@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>JWST — Exploring the Universe</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;
+  --bg2:#0d1117;
+  --surface:rgba(255,255,255,0.04);
+  --border:rgba(255,255,255,0.08);
+  --border-hover:rgba(255,255,255,0.18);
+  --text:#e8eaf0;
+  --muted:rgba(232,234,240,0.45);
+  --accent:#ffc843;
+  --accent2:#00d4ff;
+  --accent3:#ff6b6b;
+  --nav-bg:rgba(7,9,15,0.8);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;overflow-x:hidden;line-height:1.6;}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:var(--nav-bg);
+  backdrop-filter:saturate(180%) blur(24px);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
+  border-bottom:1px solid var(--border);
+  height:52px;display:flex;align-items:center;
+}
+.nav-inner{max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 24px;}
+.nav-logo{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--text);text-decoration:none;letter-spacing:2px;display:flex;align-items:center;gap:8px;}
+.logo-hex{width:18px;height:18px;position:relative;display:inline-block;}
+.logo-hex svg{width:100%;height:100%;}
+.nav-links{display:flex;align-items:center;list-style:none;gap:2px;}
+.nav-links a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:20px;transition:color .2s, background .2s;letter-spacing:0.02em;}
+.nav-links a:hover{color:var(--text);background:rgba(255,255,255,0.06);}
+.nav-links a.active{color:var(--text);background:rgba(255,255,255,0.08);}
+
+/* ── HERO ── */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:flex-end;padding-bottom:80px;overflow:hidden;
+}
+#starCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;}
+.hero-content{
+  position:relative;z-index:2;max-width:1100px;margin:0 auto;width:100%;
+  padding:0 24px;
+}
+.hero-eyebrow{
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--accent);margin-bottom:20px;
+  opacity:0;animation:fadeUp .8s .3s forwards;
+}
+.hero-title{
+  font-family:'Syne',sans-serif;font-size:clamp(3.5rem,8vw,7.5rem);
+  font-weight:800;line-height:0.95;letter-spacing:-3px;
+  color:var(--text);margin-bottom:32px;
+  opacity:0;animation:fadeUp .9s .5s forwards;
+}
+.hero-title em{font-style:normal;color:var(--accent);display:block;}
+.hero-sub{
+  font-size:1.1rem;font-weight:300;color:var(--muted);max-width:520px;
+  line-height:1.7;margin-bottom:40px;
+  opacity:0;animation:fadeUp .9s .7s forwards;
+}
+.hero-actions{
+  display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+  opacity:0;animation:fadeUp .9s .9s forwards;
+}
+.btn-primary{
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;
+  background:var(--accent);color:#07090f;padding:13px 28px;
+  border-radius:30px;text-decoration:none;transition:transform .2s, box-shadow .2s;
+  letter-spacing:0.02em;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,200,67,0.35);}
+.btn-ghost{
+  font-size:14px;color:var(--muted);text-decoration:none;
+  padding:13px 28px;border:1px solid var(--border);border-radius:30px;
+  transition:color .2s, border-color .2s;letter-spacing:0.02em;
+}
+.btn-ghost:hover{color:var(--text);border-color:var(--border-hover);}
+.hero-scroll{
+  position:absolute;bottom:32px;right:32px;z-index:2;
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;writing-mode:vertical-rl;
+  display:flex;align-items:center;gap:10px;
+  opacity:0;animation:fadeUp 1s 1.2s forwards;
+}
+.hero-scroll::after{content:'';display:block;width:1px;height:50px;background:var(--border);margin-top:10px;}
+
+/* ── STRIP ── */
+.strip{
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:var(--bg2);padding:14px 0;overflow:hidden;
+}
+.strip-inner{display:flex;gap:60px;align-items:center;animation:marquee 30s linear infinite;width:max-content;}
+.strip-item{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:12px;}
+.strip-item::before{content:'◆';font-size:6px;color:var(--accent);}
+
+/* ── SECTION SHARED ── */
+.section{max-width:1100px;margin:0 auto;padding:100px 24px;}
+.section-label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:block;}
+.section-title{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:800;line-height:1.05;letter-spacing:-1.5px;margin-bottom:16px;}
+.section-sub{font-size:1rem;color:var(--muted);max-width:480px;line-height:1.7;}
+
+/* ── EXPLORE GRID ── */
+.explore-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px;flex-wrap:wrap;gap:16px;}
+.explore-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:16px;}
+
+.exp-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;text-decoration:none;display:block;position:relative;
+  transition:border-color .3s, transform .3s, box-shadow .3s;
+  cursor:pointer;
+}
+.exp-card:hover{border-color:var(--border-hover);transform:translateY(-4px);box-shadow:0 24px 60px rgba(0,0,0,0.5);}
+.exp-card.large{grid-column:span 2;grid-row:span 1;}
+.exp-card-canvas{display:block;width:100%;}
+.exp-card.large .exp-card-canvas{height:280px;}
+.exp-card:not(.large) .exp-card-canvas{height:200px;}
+.exp-card-body{padding:22px 24px 24px;}
+.exp-card-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:block;}
+.exp-card-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:8px;}
+.exp-card.large .exp-card-title{font-size:1.5rem;}
+.exp-card-desc{font-size:0.85rem;color:var(--muted);line-height:1.6;}
+.exp-card-arrow{position:absolute;top:20px;right:20px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);transition:background .2s, color .2s;}
+.exp-card:hover .exp-card-arrow{background:var(--accent);color:#07090f;border-color:var(--accent);}
+
+/* ── STATS ROW ── */
+.stats-row{
+  background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:60px 0;
+}
+.stats-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+.stat{text-align:center;}
+.stat-num{font-family:'Syne',sans-serif;font-size:2.8rem;font-weight:800;letter-spacing:-2px;color:var(--text);display:block;margin-bottom:4px;}
+.stat-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.stat-unit{font-size:1.2rem;color:var(--accent);}
+
+/* ── FEATURED ARTICLE ── */
+.featured-row{
+  max-width:1100px;margin:0 auto;padding:0 24px 100px;
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch;
+}
+.feat-main{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;text-decoration:none;display:flex;flex-direction:column;
+  transition:border-color .3s, box-shadow .3s;
+}
+.feat-main:hover{border-color:var(--border-hover);box-shadow:0 24px 60px rgba(0,0,0,0.5);}
+.feat-canvas{display:block;width:100%;height:260px;}
+.feat-body{padding:30px 32px 32px;flex:1;display:flex;flex-direction:column;}
+.feat-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:block;}
+.feat-title{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1.15;color:var(--text);margin-bottom:12px;letter-spacing:-0.5px;}
+.feat-excerpt{font-size:0.9rem;color:var(--muted);line-height:1.7;flex:1;}
+.feat-link{font-size:13px;color:var(--accent2);margin-top:20px;letter-spacing:0.02em;}
+.feat-link::after{content:' →';}
+
+.feat-side{display:flex;flex-direction:column;gap:14px;}
+.feat-small{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;text-decoration:none;display:grid;grid-template-columns:120px 1fr;
+  flex:1;transition:border-color .3s;
+}
+.feat-small:hover{border-color:var(--border-hover);}
+.feat-small-canvas{display:block;width:120px;height:100%;}
+.feat-small-body{padding:20px;display:flex;flex-direction:column;justify-content:center;}
+.feat-small-tag{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block;}
+.feat-small-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text);line-height:1.25;margin-bottom:6px;}
+.feat-small-link{font-size:12px;color:var(--accent2);}
+.feat-small-link::after{content:' →';}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:48px 24px;
+}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;}
+.footer-logo{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:2px;color:var(--muted);}
+.footer-note{font-size:12px;color:var(--muted);text-align:right;line-height:1.8;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease, transform .8s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .explore-grid{grid-template-columns:1fr;}
+  .exp-card.large{grid-column:span 1;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);}
+  .featured-row{grid-template-columns:1fr;}
+  .feat-small{grid-template-columns:1fr;}
+  .feat-small-canvas{width:100%;height:120px;}
+}
+@media(max-width:600px){
+  .hero-title{letter-spacing:-2px;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);}
+  .nav-links{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html">
+      <span class="logo-hex"><svg viewBox="0 0 18 18" fill="none"><polygon points="9,1 16.5,5 16.5,13 9,17 1.5,13 1.5,5" stroke="#ffc843" stroke-width="1.5"/></svg></span>
+      JWST
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="overview.html">Mission</a></li>
+      <li><a href="Simulation_Transient_Curve.html">Simulations</a></li>
+      <li><a href="imageprocessing.html">Image Processing</a></li>
+      <li><a href="Blogs.html">Blogs</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <canvas id="starCanvas"></canvas>
+  <div class="hero-content">
+    <p class="hero-eyebrow">James Webb Space Telescope · NIUS Astronomy 2025</p>
+    <h1 class="hero-title">See the<br><em>Invisible</em><br>Universe.</h1>
+    <p class="hero-sub">Interactive simulations, image processing pipelines, and research blogs — built on real telescope data from TESS, ILMT, and SDO.</p>
+    <div class="hero-actions">
+      <a href="Simulation_Transient_Curve.html" class="btn-primary">Explore Simulations</a>
+      <a href="imageprocessing.html" class="btn-ghost">Image Pipeline →</a>
+    </div>
+  </div>
+  <span class="hero-scroll">Scroll</span>
+</section>
+
+<!-- STRIP -->
+<div class="strip">
+  <div class="strip-inner">
+    <span class="strip-item">TESS Photometry</span>
+    <span class="strip-item">Batman Transit Modeling</span>
+    <span class="strip-item">CCD Calibration</span>
+    <span class="strip-item">BLS Periodogram</span>
+    <span class="strip-item">SDO / AIA 171Å</span>
+    <span class="strip-item">ILMT Image Subtraction</span>
+    <span class="strip-item">Aperture Photometry</span>
+    <span class="strip-item">JWST Infrared</span>
+    <span class="strip-item">SunPy · aiapy</span>
+    <!-- duplicate for seamless loop -->
+    <span class="strip-item">TESS Photometry</span>
+    <span class="strip-item">Batman Transit Modeling</span>
+    <span class="strip-item">CCD Calibration</span>
+    <span class="strip-item">BLS Periodogram</span>
+    <span class="strip-item">SDO / AIA 171Å</span>
+    <span class="strip-item">ILMT Image Subtraction</span>
+    <span class="strip-item">Aperture Photometry</span>
+    <span class="strip-item">JWST Infrared</span>
+    <span class="strip-item">SunPy · aiapy</span>
+  </div>
+</div>
+
+<!-- EXPLORE -->
+<div class="section reveal">
+  <div class="explore-header">
+    <div>
+      <span class="section-label">Explore</span>
+      <h2 class="section-title">What's inside.</h2>
+    </div>
+    <p class="section-sub">Interactive tools and research across exoplanets, solar physics, and deep-field astronomy.</p>
+  </div>
+  <div class="explore-grid">
+
+    <!-- Large card: Simulations -->
+    <a class="exp-card large" href="Simulation_Transient_Curve.html">
+      <canvas class="exp-card-canvas" id="ec0" width="800" height="280"></canvas>
+      <div class="exp-card-body">
+        <span class="exp-card-tag" style="color:#00d4ff">Interactive</span>
+        <div class="exp-card-title">Transit & Light Curve Simulations</div>
+        <p class="exp-card-desc">Model exoplanet transits in real time. Adjust planet radius, inclination, and orbital period — watch the light curve respond instantly.</p>
+      </div>
+      <span class="exp-card-arrow">↗</span>
+    </a>
+
+    <!-- Small: Mission -->
+    <a class="exp-card" href="overview.html">
+      <canvas class="exp-card-canvas" id="ec1" width="400" height="200"></canvas>
+      <div class="exp-card-body">
+        <span class="exp-card-tag" style="color:#ffc843">Mission</span>
+        <div class="exp-card-title">JWST Overview</div>
+        <p class="exp-card-desc">6.5m mirror. L2 orbit. Infrared vision back to 13.5 billion years.</p>
+      </div>
+      <span class="exp-card-arrow">↗</span>
+    </a>
+
+    <!-- Small: Image Processing -->
+    <a class="exp-card" href="imageprocessing.html">
+      <canvas class="exp-card-canvas" id="ec2" width="400" height="200"></canvas>
+      <div class="exp-card-body">
+        <span class="exp-card-tag" style="color:#ff6b6b">Pipeline</span>
+        <div class="exp-card-title">Image Processing</div>
+        <p class="exp-card-desc">Bias correction, aperture photometry, and ILMT difference imaging — full CCD pipeline.</p>
+      </div>
+      <span class="exp-card-arrow">↗</span>
+    </a>
+
+    <!-- Small: Solar -->
+    <a class="exp-card" href="Simulation_Transient_Curve.html#solar">
+      <canvas class="exp-card-canvas" id="ec3" width="400" height="200"></canvas>
+      <div class="exp-card-body">
+        <span class="exp-card-tag" style="color:#ff9030">Solar Physics</span>
+        <div class="exp-card-title">Solar Data Analysis</div>
+        <p class="exp-card-desc">SDO/AIA 171Å EUV imaging of the corona, active regions, and coronal holes with SunPy.</p>
+      </div>
+      <span class="exp-card-arrow">↗</span>
+    </a>
+
+    <!-- Small: Blogs -->
+    <a class="exp-card" href="Blogs.html">
+      <canvas class="exp-card-canvas" id="ec4" width="400" height="200"></canvas>
+      <div class="exp-card-body">
+        <span class="exp-card-tag" style="color:#a78bfa">Research</span>
+        <div class="exp-card-title">Research Blogs</div>
+        <p class="exp-card-desc">Deep dives into transit detection, CCD calibration, BLS periodograms, and JWST discoveries.</p>
+      </div>
+      <span class="exp-card-arrow">↗</span>
+    </a>
+
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row reveal">
+  <div class="stats-inner">
+    <div class="stat">
+      <span class="stat-num">6.5<span class="stat-unit">m</span></span>
+      <span class="stat-label">Primary Mirror</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">1.5<span class="stat-unit">M km</span></span>
+      <span class="stat-label">From Earth</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">13.5<span class="stat-unit">B yr</span></span>
+      <span class="stat-label">Lookback Time</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">−233<span class="stat-unit">°C</span></span>
+      <span class="stat-label">Operating Temp</span>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURED READING -->
+<div class="featured-row reveal">
+  <a class="feat-main" href="Blogs.html">
+    <canvas class="feat-canvas" id="fc0" width="600" height="260"></canvas>
+    <div class="feat-body">
+      <span class="feat-tag">Featured Post</span>
+      <h3 class="feat-title">Detecting an Exoplanet Transit with TESS & Batman</h3>
+      <p class="feat-excerpt">From downloading raw TESS light curves to fitting a Batman transit model — a complete walkthrough of the photometric pipeline, BLS period search, and what the light curve physically encodes.</p>
+      <span class="feat-link">Read the article</span>
+    </div>
+  </a>
+  <div class="feat-side">
+    <a class="feat-small" href="Blogs.html">
+      <canvas class="feat-small-canvas" id="fc1" width="120" height="140"></canvas>
+      <div class="feat-small-body">
+        <span class="feat-small-tag">CCD Imaging</span>
+        <div class="feat-small-title">Why Raw Telescope Images Are Scientifically Unusable</div>
+        <span class="feat-small-link">Read more</span>
+      </div>
+    </a>
+    <a class="feat-small" href="Blogs.html">
+      <canvas class="feat-small-canvas" id="fc2" width="120" height="140"></canvas>
+      <div class="feat-small-body">
+        <span class="feat-small-tag">Solar Physics</span>
+        <div class="feat-small-title">The Solar Corona in EUV: Active Regions with SDO/AIA</div>
+        <span class="feat-small-link">Read more</span>
+      </div>
+    </a>
+    <a class="feat-small" href="Blogs.html">
+      <canvas class="feat-small-canvas" id="fc3" width="120" height="140"></canvas>
+      <div class="feat-small-body">
+        <span class="feat-small-tag">JWST Science</span>
+        <div class="feat-small-title">JWST: Two Years of Science and What Comes Next</div>
+        <span class="feat-small-link">Read more</span>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-logo">◆ JWST · NIUS 2025</span>
+    <p class="footer-note">Data Processing in Astronomy Workshop<br>Built with HTML, CSS &amp; JavaScript</p>
+  </div>
+</footer>
+
+<script>
+// ── STARFIELD ──
+const canvas = document.getElementById('starCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, stars = [], nebula = [];
+
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  initStars();
+}
+
+function initStars(){
+  stars = [];
+  for(let i=0; i<220; i++){
+    stars.push({
+      x: Math.random()*W, y: Math.random()*H,
+      r: Math.random()*1.4+0.2,
+      o: Math.random()*0.7+0.15,
+      speed: Math.random()*0.015+0.003,
+      phase: Math.random()*Math.PI*2
+    });
+  }
+  nebula = [];
+  const cols = ['rgba(0,100,180','rgba(60,0,120','rgba(0,60,120','rgba(100,40,0'];
+  for(let i=0; i<6; i++){
+    nebula.push({
+      x: Math.random()*W, y: Math.random()*H*0.7,
+      r: Math.random()*280+160,
+      c: cols[i%cols.length],
+      o: Math.random()*0.07+0.03
+    });
+  }
+}
+
+let t = 0;
+function drawStars(){
+  ctx.clearRect(0,0,W,H);
+  // gradient bg
+  const bg = ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#07090f'); bg.addColorStop(1,'#0a0e1a');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+  // nebula blobs
+  nebula.forEach(n => {
+    const g = ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
+    g.addColorStop(0, n.c+','+n.o+')');
+    g.addColorStop(1, n.c+',0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2); ctx.fill();
+  });
+
+  // stars
+  t += 0.012;
+  stars.forEach(s => {
+    const alpha = s.o * (0.6 + 0.4*Math.sin(t*s.speed*80 + s.phase));
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(220,230,255,${alpha})`; ctx.fill();
+  });
+
+  // JWST hexagonal mirror (top-right decorative)
+  const mx = W*0.78, my = H*0.28, hr = 18;
+  const hexOffsets = [[0,0],[-1.73,-1],[1.73,-1],[-1.73,1],[1.73,1],[0,-2],[0,2]];
+  const colors = ['rgba(255,200,67,0.7)','rgba(0,212,255,0.5)','rgba(255,200,67,0.4)'];
+  hexOffsets.forEach(([dx,dy],i)=>{
+    const hx = mx + dx*hr*0.95, hy = my + dy*hr*0.83;
+    ctx.beginPath();
+    for(let a=0;a<6;a++){
+      const ax = hx+hr*Math.cos(a*Math.PI/3-Math.PI/6);
+      const ay = hy+hr*Math.sin(a*Math.PI/3-Math.PI/6);
+      a ? ctx.lineTo(ax,ay) : ctx.moveTo(ax,ay);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = colors[i%3]; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,200,67,0.04)'; ctx.fill();
+  });
+
+  // Bottom gradient fade
+  const fade = ctx.createLinearGradient(0,H*0.55,0,H);
+  fade.addColorStop(0,'rgba(7,9,15,0)'); fade.addColorStop(1,'rgba(7,9,15,0.95)');
+  ctx.fillStyle = fade; ctx.fillRect(0,0,W,H);
+
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', resize);
+resize();
+drawStars();
+
+// ── EXPLORE CARD CANVASES ──
+function drawEC(id, type){
+  const c = document.getElementById(id);
+  if(!c) return;
+  const ctx = c.getContext('2d'), W=c.width, H=c.height;
+
+  if(type==='transit'){
+    // dark space + star + planet transit animation preview
+    const bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#020814'); bg.addColorStop(1,'#050d20');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    for(let i=0;i<180;i++){
+      ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,Math.random()*1.3+0.2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(220,230,255,${Math.random()*0.6+0.1})`;ctx.fill();
+    }
+    // star
+    const sg=ctx.createRadialGradient(W*0.35,H*0.42,0,W*0.35,H*0.42,80);
+    sg.addColorStop(0,'#fff9d0');sg.addColorStop(0.4,'#ffcc44');sg.addColorStop(0.8,'rgba(200,80,0,0.3)');sg.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(W*0.35,H*0.42,80,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+    // planet
+    const pg=ctx.createRadialGradient(W*0.6,H*0.32,0,W*0.6,H*0.32,24);
+    pg.addColorStop(0,'#4a8ac0');pg.addColorStop(1,'#0a1830');
+    ctx.beginPath();ctx.arc(W*0.6,H*0.32,24,0,Math.PI*2);ctx.fillStyle=pg;ctx.fill();
+    // light curve preview
+    ctx.beginPath();ctx.strokeStyle='rgba(0,212,255,0.8)';ctx.lineWidth=2;
+    const pts=[[W*0.05,H*0.82],[W*0.3,H*0.8],[W*0.42,H*0.92],[W*0.52,H*0.92],[W*0.65,H*0.8],[W*0.95,H*0.79]];
+    pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
+  }
+  else if(type==='jwst'){
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#020c1e');bg.addColorStop(1,'#040818');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<120;i++){
+      ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,Math.random()*1.2+0.2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(220,230,255,${Math.random()*0.5+0.1})`;ctx.fill();
+    }
+    // deep field blobs
+    ['rgba(0,100,200,0.15)','rgba(80,0,150,0.12)','rgba(0,150,120,0.1)'].forEach((c,i)=>{
+      const x=Math.random()*W, y=Math.random()*H, r=60+i*40;
+      const g=ctx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,c);g.addColorStop(1,'transparent');
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    });
+    const hcx=W*0.62,hcy=H*0.48,hr2=22;
+    [[0,0],[-1.73,-1],[1.73,-1],[-1.73,1],[1.73,1],[0,-2],[0,2]].forEach(([dx,dy])=>{
+      const hx=hcx+dx*hr2*0.95,hy=hcy+dy*hr2*0.83;
+      ctx.beginPath();
+      for(let a=0;a<6;a++){const ax=hx+hr2*Math.cos(a*Math.PI/3-Math.PI/6),ay=hy+hr2*Math.sin(a*Math.PI/3-Math.PI/6);a?ctx.lineTo(ax,ay):ctx.moveTo(ax,ay);}
+      ctx.closePath();ctx.strokeStyle='rgba(255,200,67,0.6)';ctx.lineWidth=1;ctx.stroke();
+      ctx.fillStyle='rgba(255,200,67,0.04)';ctx.fill();
+    });
+  }
+  else if(type==='img'){
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#020810');bg.addColorStop(1,'#04101a');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<100;i++){
+      const hot=Math.random()<0.05;
+      ctx.fillStyle=`rgba(${hot?'255,80,30':'180,210,255'},${Math.random()*0.4+0.08})`;
+      ctx.fillRect(Math.random()*W,Math.random()*H,2,2);
+    }
+    ctx.strokeStyle='rgba(0,212,255,0.07)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=22){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=22){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    const cg=ctx.createRadialGradient(W*0.55,H*0.45,0,W*0.55,H*0.45,60);
+    cg.addColorStop(0,'rgba(0,200,255,0.35)');cg.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(W*0.55,H*0.45,60,0,Math.PI*2);ctx.fillStyle=cg;ctx.fill();
+    ctx.strokeStyle='rgba(255,200,67,0.5)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.arc(W*0.55,H*0.45,22,0,Math.PI*2);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  else if(type==='solar'){
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#0d0500');bg.addColorStop(1,'#020200');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    const sg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.min(W,H)*0.42);
+    sg.addColorStop(0,'rgba(255,240,180,0.6)');sg.addColorStop(0.35,'rgba(255,140,30,0.45)');sg.addColorStop(0.65,'rgba(200,60,0,0.2)');sg.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(W/2,H/2,Math.min(W,H)*0.42,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+    for(let a=0;a<10;a++){
+      const ang=a/10*Math.PI*2, r1=Math.min(W,H)*0.35, r2=r1+20+Math.random()*30;
+      ctx.beginPath();ctx.moveTo(W/2+r1*Math.cos(ang),H/2+r1*Math.sin(ang));
+      ctx.quadraticCurveTo(W/2+(r2+15)*Math.cos(ang+0.3),H/2+(r2+15)*Math.sin(ang+0.3),W/2+r1*Math.cos(ang+0.55),H/2+r1*Math.sin(ang+0.55));
+      ctx.strokeStyle='rgba(255,120,20,0.2)';ctx.lineWidth=3;ctx.stroke();
+    }
+    ctx.fillStyle='rgba(10,4,0,0.65)';ctx.beginPath();ctx.arc(W*0.38,H*0.4,7,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(10,4,0,0.5)';ctx.beginPath();ctx.arc(W*0.58,H*0.55,5,0,Math.PI*2);ctx.fill();
+  }
+  else if(type==='blog'){
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#080612');bg.addColorStop(1,'#04040c');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<80;i++){
+      ctx.fillStyle=`rgba(160,130,255,${Math.random()*0.25+0.05})`;
+      ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,Math.random()*1+0.2,0,Math.PI*2);ctx.fill();
+    }
+    [H*0.3,H*0.45,H*0.6,H*0.75].forEach((y,i)=>{
+      ctx.beginPath();ctx.moveTo(W*0.1,y);ctx.lineTo(W*(0.9-i*0.06),y);
+      ctx.strokeStyle=`rgba(160,130,255,${0.4-i*0.05})`;ctx.lineWidth=1.5+i*0.3;ctx.stroke();
+    });
+  }
+
+  // bottom fade overlay
+  const ov=ctx.createLinearGradient(0,H*0.5,0,H);
+  ov.addColorStop(0,'transparent');ov.addColorStop(1,'rgba(13,17,23,0.7)');
+  ctx.fillStyle=ov;ctx.fillRect(0,0,W,H);
+}
+
+drawEC('ec0','transit');
+drawEC('ec1','jwst');
+drawEC('ec2','img');
+drawEC('ec3','solar');
+drawEC('ec4','blog');
+
+// ── FEATURE CANVASES ──
+function drawFC(id,type){
+  const c=document.getElementById(id);if(!c)return;
+  const ctx=c.getContext('2d'),W=c.width,H=c.height;
+  if(type==='exoplanet'){
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#020814');bg.addColorStop(1,'#050d20');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<160;i++){ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,Math.random()*1.2+0.2,0,Math.PI*2);ctx.fillStyle=`rgba(220,230,255,${Math.random()*0.6+0.1})`;ctx.fill();}
+    const sg=ctx.createRadialGradient(W*0.4,H*0.45,0,W*0.4,H*0.45,70);
+    sg.addColorStop(0,'#fff9d0');sg.addColorStop(0.4,'#ffcc44');sg.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(W*0.4,H*0.45,70,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+    const pg=ctx.createRadialGradient(W*0.68,H*0.3,0,W*0.68,H*0.3,20);
+    pg.addColorStop(0,'#4a8ac0');pg.addColorStop(1,'#0a1830');
+    ctx.beginPath();ctx.arc(W*0.68,H*0.3,20,0,Math.PI*2);ctx.fillStyle=pg;ctx.fill();
+  } else if(type==='ccd'){
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#020810');bg.addColorStop(1,'#041018');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<120;i++){const hot=Math.random()<0.06;ctx.fillStyle=`rgba(${hot?'255,70,30':'160,200,255'},${Math.random()*0.5+0.1})`;ctx.fillRect(Math.random()*W,Math.random()*H,2,2);}
+    ctx.strokeStyle='rgba(0,212,255,0.06)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  } else if(type==='solar2'){
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#0d0500');bg.addColorStop(1,'#030200');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    const sg=ctx.createRadialGradient(W*0.45,H*0.5,0,W*0.45,H*0.5,80);
+    sg.addColorStop(0,'rgba(255,240,180,0.5)');sg.addColorStop(0.4,'rgba(255,130,20,0.4)');sg.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(W*0.45,H*0.5,80,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+  } else if(type==='jwst2'){
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#020c1e');bg.addColorStop(1,'#040818');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<100;i++){ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,Math.random()*1.2+0.2,0,Math.PI*2);ctx.fillStyle=`rgba(220,230,255,${Math.random()*0.5+0.1})`;ctx.fill();}
+    const hcx=W*0.5,hcy=H*0.5,hr=18;
+    [[0,0],[-1.73,-1],[1.73,-1],[-1.73,1],[1.73,1],[0,-2],[0,2]].forEach(([dx,dy])=>{
+      const hx=hcx+dx*hr*0.95,hy=hcy+dy*hr*0.83;
+      ctx.beginPath();
+      for(let a=0;a<6;a++){const ax=hx+hr*Math.cos(a*Math.PI/3-Math.PI/6),ay=hy+hr*Math.sin(a*Math.PI/3-Math.PI/6);a?ctx.lineTo(ax,ay):ctx.moveTo(ax,ay);}
+      ctx.closePath();ctx.strokeStyle='rgba(255,200,67,0.55)';ctx.lineWidth=1;ctx.stroke();
+    });
+  }
+  const ov=ctx.createLinearGradient(0,H*0.4,0,H);ov.addColorStop(0,'transparent');ov.addColorStop(1,'rgba(7,9,15,0.6)');
+  ctx.fillStyle=ov;ctx.fillRect(0,0,W,H);
+}
+drawFC('fc0','exoplanet');
+drawFC('fc1','ccd');
+drawFC('fc2','solar2');
+drawFC('fc3','jwst2');
+
+// ── SCROLL REVEAL ──
+const reveals = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});
+},{threshold:0.1});
+reveals.forEach(r=>io.observe(r));
+</script>
+</body>
+</html>
