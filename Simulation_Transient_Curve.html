@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIUS 2025 — Transit Light Curve Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #04060f;
+    --surface:   #0b0f1e;
+    --card:      #111827;
+    --border:    #1e2a3a;
+    --accent:    #5b8dee;
+    --accent2:   #f0a04a;
+    --accent3:   #5ddead;
+    --muted:     #4a5a72;
+    --text:      #c9d8ef;
+    --text-dim:  #6b7f99;
+    --code-bg:   #070c18;
+    --radius:    10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── starfield ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,.55) 0%, transparent 100%),
+      radial-gradient(1px 1px at 72% 8%,  rgba(255,255,255,.45) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 44% 55%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 88% 42%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5%  70%, rgba(255,255,255,.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 30% 90%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 95% 65%, rgba(255,255,255,.35) 0%, transparent 100%),
+      radial-gradient(1px 1px at 22% 48%, rgba(255,255,255,.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 79% 30%, rgba(255,255,255,.4) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── layout ── */
+  .page-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── header ── */
+  .hero {
+    text-align: center;
+    padding: 72px 0 56px;
+    position: relative;
+  }
+
+  .hero-orbit {
+    display: block;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 32px;
+    position: relative;
+  }
+
+  .hero-orbit svg { width: 100%; height: 100%; }
+
+  .planet-ring {
+    animation: spin 18s linear infinite;
+    transform-origin: 60px 60px;
+  }
+  .planet-dot {
+    animation: orbit 4s linear infinite;
+    transform-origin: 60px 60px;
+  }
+
+  @keyframes spin   { to { transform: rotate(360deg); } }
+  @keyframes orbit  { to { transform: rotate(360deg); } }
+
+  .badge {
+    display: inline-block;
+    background: rgba(91,141,238,.12);
+    border: 1px solid rgba(91,141,238,.35);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .12em;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    color: var(--text-dim);
+    font-size: .95rem;
+    margin-bottom: 28px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .meta-chip {
+    font-family: 'Space Mono', monospace;
+    font-size: .75rem;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 6px;
+  }
+  .meta-chip span { color: var(--accent2); margin-right: 6px; }
+
+  /* ── divider ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 40px 0;
+  }
+
+  /* ── toc ── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 40px;
+  }
+
+  .toc-title {
+    font-size: .7rem;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 32px;
+  }
+
+  .toc li {
+    counter-increment: toc;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .85rem;
+  }
+
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: 'Space Mono', monospace;
+    font-size: .7rem;
+    color: var(--accent);
+    min-width: 22px;
+  }
+
+  .toc a {
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .toc a:hover { color: var(--text); }
+
+  @media (max-width: 540px) { .toc ol { grid-template-columns: 1fr; } }
+
+  /* ── section ── */
+  .section {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: fadeUp .5s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section:nth-child(1)  { animation-delay: .1s; }
+  .section:nth-child(2)  { animation-delay: .2s; }
+  .section:nth-child(3)  { animation-delay: .3s; }
+  .section:nth-child(4)  { animation-delay: .4s; }
+  .section:nth-child(5)  { animation-delay: .5s; }
+  .section:nth-child(6)  { animation-delay: .6s; }
+  .section:nth-child(7)  { animation-delay: .7s; }
+  .section:nth-child(8)  { animation-delay: .8s; }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: .75rem;
+    color: var(--accent);
+    background: rgba(91,141,238,.1);
+    border: 1px solid rgba(91,141,238,.25);
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -.01em;
+  }
+
+  .section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent2);
+    margin: 22px 0 10px;
+    letter-spacing: .02em;
+  }
+
+  /* ── prose ── */
+  .prose {
+    font-size: .92rem;
+    color: var(--text);
+    line-height: 1.8;
+  }
+
+  .prose p { margin-bottom: 12px; }
+
+  .prose strong { color: #fff; font-weight: 700; }
+
+  .prose a { color: var(--accent); text-decoration: underline; text-decoration-style: dotted; }
+
+  .prose ul, .prose ol {
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+
+  .prose li { margin-bottom: 4px; }
+
+  /* ── callout ── */
+  .callout {
+    background: rgba(93,222,173,.06);
+    border-left: 3px solid var(--accent3);
+    padding: 14px 18px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-family: 'Space Mono', monospace;
+    font-size: .82rem;
+    color: var(--accent3);
+    margin: 18px 0;
+    font-style: italic;
+  }
+
+  /* ── code block ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: 18px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: rgba(255,255,255,.025);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-family: 'Space Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent2);
+  }
+
+  .code-dots { display: flex; gap: 5px; }
+  .code-dot  {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .code-dot:nth-child(1) { background: #ff5f57; }
+  .code-dot:nth-child(2) { background: #febc2e; }
+  .code-dot:nth-child(3) { background: #28c840; }
+
+  pre {
+    margin: 0;
+    padding: 18px;
+    overflow-x: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: .8rem;
+    line-height: 1.7;
+    color: #a8c0df;
+  }
+
+  /* syntax highlight helpers */
+  .kw   { color: #c792ea; }   /* keyword  */
+  .fn   { color: #82aaff; }   /* function */
+  .str  { color: #c3e88d; }   /* string   */
+  .num  { color: #f78c6c; }   /* number   */
+  .cmt  { color: #546e7a; font-style: italic; } /* comment */
+  .var  { color: #eeffff; }
+  .op   { color: #89ddff; }
+  .mod  { color: #ffcb6b; }
+
+  /* ── param table ── */
+  .param-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: .85rem;
+  }
+
+  .param-table th {
+    text-align: left;
+    font-family: 'Space Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .param-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid rgba(30,42,58,.6);
+    color: var(--text-dim);
+  }
+
+  .param-table tr:hover td { background: rgba(255,255,255,.02); }
+
+  .param-table td:first-child {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent2);
+    font-size: .78rem;
+  }
+
+  /* ── info cards ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 18px 0;
+  }
+
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+
+  .info-card .ic-label {
+    font-family: 'Space Mono', monospace;
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .info-card .ic-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .info-card .ic-desc {
+    font-size: .78rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* ── pill tags ── */
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: .7rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  .tag-blue   { color: var(--accent);  border-color: rgba(91,141,238,.3);  background: rgba(91,141,238,.08); }
+  .tag-green  { color: var(--accent3); border-color: rgba(93,222,173,.3); background: rgba(93,222,173,.08); }
+  .tag-orange { color: var(--accent2); border-color: rgba(240,160,74,.3); background: rgba(240,160,74,.08); }
+
+  /* ── footer ── */
+  footer {
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: .72rem;
+    color: var(--muted);
+    line-height: 2;
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- ══ HERO ══ -->
+  <header class="hero">
+    <span class="hero-orbit" aria-hidden="true">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- star glow -->
+        <circle cx="60" cy="60" r="18" fill="#f5c97a" opacity=".15"/>
+        <circle cx="60" cy="60" r="12" fill="#f5c97a" opacity=".25"/>
+        <circle cx="60" cy="60" r="7"  fill="#fde68a"/>
+        <!-- orbit ring -->
+        <ellipse class="planet-ring" cx="60" cy="60" rx="46" ry="16" stroke="rgba(91,141,238,.35)" stroke-width="1" stroke-dasharray="4 3"/>
+        <!-- planet -->
+        <g class="planet-dot">
+          <circle cx="106" cy="60" r="5" fill="#5b8dee"/>
+          <circle cx="106" cy="60" r="3" fill="#93c5fd"/>
+        </g>
+        <!-- transit dip line -->
+        <path d="M 20 95 L 40 95 L 47 104 L 55 104 L 62 95 L 100 95" stroke="#5ddead" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+    </span>
+
+    <div class="badge">🪐 NIUS Astronomy 2025</div>
+
+    <h1>Catching <em>Shadows</em><br>of Distant Worlds</h1>
+    <p class="hero-sub">Data Processing in Astronomy Workshop — Time Series Analysis</p>
+
+    <div class="meta-row">
+      <div class="meta-chip"><span>📅</span>15 Dec 2025</div>
+      <div class="meta-chip"><span>🔭</span>TESS · Kepler · WASP-100</div>
+      <div class="meta-chip"><span>🏛</span>HBCSE-TIFR</div>
+      <div class="meta-chip"><span>👩‍🏫</span>Dr. Priyanka Chaturvedi</div>
+    </div>
+  </header>
+
+  <div class="divider"></div>
+
+  <!-- ══ TOC ══ -->
+  <nav class="toc">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#s-objective">Session Objective</a></li>
+      <li><a href="#s-setup">Environment Setup</a></li>
+      <li><a href="#s-tess">Loading TESS Data</a></li>
+      <li><a href="#s-pld">PLD Correction</a></li>
+      <li><a href="#s-bls">BLS Periodogram</a></li>
+      <li><a href="#s-batman">batman Transit Model</a></li>
+      <li><a href="#s-mcmc">MCMC Fitting</a></li>
+      <li><a href="#s-problem">Problem Statement</a></li>
+    </ol>
+  </nav>
+
+  <!-- ══ SECTION 1 ══ -->
+  <section class="section" id="s-objective">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>Session Objective</h2>
+    </div>
+    <div class="prose">
+      <p>Welcome to this tutorial session! We will explore one of the most common, powerful, yet elegant astrophysical techniques to detect exoplanets around their host stars — the <strong>transit method</strong>.</p>
+
+      <div class="callout">
+        "In astronomy, you often learn a lot from what you <strong>can't see</strong>… especially when it causes a tiny but regular blip in what you <strong>can</strong>." 😉
+      </div>
+
+      <p>In this session we explore:</p>
+      <ul>
+        <li>What light curves are and how to make sense of them</li>
+        <li>How to detect tiny dips caused by planetary transits</li>
+        <li>How to model these dips using Python tools like <code>batman</code></li>
+        <li>How to find planet and orbital properties through this</li>
+      </ul>
+    </div>
+
+    <div class="tags">
+      <span class="tag tag-blue">lightkurve</span>
+      <span class="tag tag-blue">astropy</span>
+      <span class="tag tag-blue">batman-package</span>
+      <span class="tag tag-green">BLS</span>
+      <span class="tag tag-green">MCMC</span>
+      <span class="tag tag-orange">TESS</span>
+      <span class="tag tag-orange">Kepler</span>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 2 ══ -->
+  <section class="section" id="s-setup">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>Environment Setup</h2>
+    </div>
+    <div class="prose">
+      <p>Install all required packages. We pin <code>numpy==1.26.4</code> for compatibility with <code>PyTransit</code>.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">bash — pip installs</span>
+      </div>
+      <pre><span class="cmt"># Upgrade pip first</span>
+<span class="op">!</span>pip install <span class="op">--</span>upgrade pip
+
+<span class="cmt"># Scientific stack</span>
+<span class="op">!</span>pip install <span class="str">numpy==1.26.4</span> scipy matplotlib
+
+<span class="cmt"># Lightkurve (NASA-supported)</span>
+<span class="op">!</span>pip install lightkurve astroquery
+
+<span class="cmt"># Exoplanet transit tools</span>
+<span class="op">!</span>pip install batman-package
+<span class="op">!</span>pip install <span class="str">PyTransit==2.5.18</span>  <span class="cmt"># works with numpy 1.26.x</span>
+<span class="op">!</span>pip install astropy</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">python — verify installation</span>
+      </div>
+      <pre><span class="kw">import</span> <span class="mod">numpy</span> <span class="kw">as</span> np
+<span class="kw">import</span> <span class="mod">lightkurve</span> <span class="kw">as</span> lk
+<span class="kw">from</span> <span class="mod">astroquery.mast</span> <span class="kw">import</span> Catalogs
+<span class="kw">import</span> <span class="mod">matplotlib.pyplot</span> <span class="kw">as</span> plt
+
+<span class="fn">print</span>(<span class="str">"NumPy version:"</span>, np.__version__)
+<span class="fn">print</span>(<span class="str">"Lightkurve version:"</span>, lk.__version__)</pre>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 3 ══ -->
+  <section class="section" id="s-tess">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2>Loading TESS Data — WASP-100</h2>
+    </div>
+    <div class="prose">
+      <p><strong>WASP-100</strong> is a hot Jupiter host star. We load pre-downloaded TESS Pixel Files (TPF) and light curves (LC) from Google Drive to work completely offline.</p>
+    </div>
+
+    <div class="cards">
+      <div class="info-card">
+        <div class="ic-label">TIC ID</div>
+        <div class="ic-value">38846515</div>
+        <div class="ic-desc">TESS Input Catalog identifier</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">Mission</div>
+        <div class="ic-value">TESS S1</div>
+        <div class="ic-desc">Sector 1, Full Frame Image</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">Files</div>
+        <div class="ic-value">TPF + LC</div>
+        <div class="ic-desc">Target Pixel File & Light Curve</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">python — load fits files</span>
+      </div>
+      <pre><span class="kw">import</span> <span class="mod">lightkurve</span> <span class="kw">as</span> lk
+<span class="kw">from</span> <span class="mod">astropy.io</span> <span class="kw">import</span> fits
+
+abs_drive_path <span class="op">=</span> <span class="str">"/content/drive/MyDrive/NIUS/Lightcurve/"</span>
+
+tpf_path <span class="op">=</span> abs_drive_path <span class="op">+</span> <span class="str">"tess2018206045859-s0001-0000000038846515-0120-s_tp.fits"</span>
+lc_path  <span class="op">=</span> abs_drive_path <span class="op">+</span> <span class="str">"tess2018206045859-s0001-0000000038846515-0120-s_lc.fits"</span>
+
+tpf <span class="op">=</span> lk.<span class="fn">read</span>(tpf_path)
+lc  <span class="op">=</span> lk.<span class="fn">read</span>(lc_path)
+
+<span class="cmt"># Read metadata from FITS header</span>
+h    <span class="op">=</span> fits.<span class="fn">getheader</span>(lc_path)
+tic  <span class="op">=</span> h.<span class="fn">get</span>(<span class="str">"TICID"</span>,   <span class="str">"Unknown"</span>)
+tmag <span class="op">=</span> h.<span class="fn">get</span>(<span class="str">"TESSMAG"</span>, <span class="str">"Unknown"</span>)
+ra   <span class="op">=</span> h.<span class="fn">get</span>(<span class="str">"RA_OBJ"</span>,  <span class="str">"Unknown"</span>)
+dec  <span class="op">=</span> h.<span class="fn">get</span>(<span class="str">"DEC_OBJ"</span>, <span class="str">"Unknown"</span>)
+
+<span class="fn">print</span>(<span class="str">f"Loaded TIC <span class="var">{tic}</span> — TESS mag = <span class="var">{tmag}</span>"</span>)
+<span class="fn">print</span>(<span class="str">f"RA, Dec = <span class="var">{ra}</span>, <span class="var">{dec}</span>"</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 4 ══ -->
+  <section class="section" id="s-pld">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>PLD Systematics Correction</h2>
+    </div>
+    <div class="prose">
+      <p><strong>Pixel Level Decorrelation (PLD)</strong> removes instrumental systematics from the raw photometry. It uses a PCA-based approach to separate astrophysical signal from spacecraft-induced trends.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">python — aperture + PLD correction</span>
+      </div>
+      <pre><span class="kw">from</span> <span class="mod">lightkurve.correctors</span> <span class="kw">import</span> PLDCorrector
+
+<span class="cmt"># Create aperture mask (threshold = 3σ)</span>
+aperture     <span class="op">=</span> tpf.<span class="fn">create_threshold_mask</span>(threshold<span class="op">=</span><span class="num">3</span>)
+raw_lc       <span class="op">=</span> tpf.<span class="fn">to_lightcurve</span>(aperture_mask<span class="op">=</span>aperture)
+
+<span class="cmt"># Apply PLD correction</span>
+corrector    <span class="op">=</span> <span class="fn">PLDCorrector</span>(tpf)
+corrected_lc <span class="op">=</span> corrector.<span class="fn">correct</span>(aperture_mask<span class="op">=</span>aperture)
+
+<span class="cmt"># Plot raw vs corrected</span>
+plt.<span class="fn">plot</span>(raw_time[q], raw_flux[q] <span class="op">/</span> np.<span class="fn">nanmedian</span>(raw_flux[q]) <span class="op">+</span> <span class="num">0.06</span>, <span class="str">'k'</span>, label<span class="op">=</span><span class="str">"Raw"</span>)
+plt.<span class="fn">plot</span>(corr_time[m], corr_flux[m] <span class="op">/</span> np.<span class="fn">nanmedian</span>(corr_flux[m]), <span class="str">'g'</span>, label<span class="op">=</span><span class="str">"PLD Corrected"</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 5 ══ -->
+  <section class="section" id="s-bls">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <h2>Box Least Squares — Period Finding</h2>
+    </div>
+    <div class="prose">
+      <p>The <strong>Box Least Squares (BLS)</strong> method is designed specifically to find periodic, box-shaped decreases in brightness — exactly the shape of a planetary transit: <em>flat → sudden drop → flat → return to baseline.</em></p>
+      <p>See the <a href="https://docs.astropy.org/en/latest/timeseries/bls.html" target="_blank">AstroPy BLS documentation</a> for full details.</p>
+    </div>
+
+    <h3>Algorithm</h3>
+    <div class="prose">
+      <ol>
+        <li>Build a log-spaced period grid from 0.1 to 15 days</li>
+        <li>Compute BLS power at each period trial</li>
+        <li>Locate the highest power peak → best period</li>
+        <li>Reject harmonic aliases (P/2, 2P, P/3, …)</li>
+        <li>Phase-fold data at the best period and plot the transit</li>
+      </ol>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">python — BLS periodogram</span>
+      </div>
+      <pre><span class="kw">from</span> <span class="mod">astropy.timeseries</span> <span class="kw">import</span> BoxLeastSquares
+
+<span class="cmt"># Log-spaced period grid: 0.1 → 15 days</span>
+period_grid <span class="op">=</span> np.<span class="fn">exp</span>(np.<span class="fn">linspace</span>(np.<span class="fn">log</span>(<span class="num">0.1</span>), np.<span class="fn">log</span>(<span class="num">15</span>), <span class="num">50000</span>))
+
+bls       <span class="op">=</span> <span class="fn">BoxLeastSquares</span>(time, flux)
+bls_power <span class="op">=</span> bls.<span class="fn">power</span>(period_grid, <span class="num">0.1</span>, oversample<span class="op">=</span><span class="num">20</span>)
+
+<span class="cmt"># Best peak</span>
+index      <span class="op">=</span> np.<span class="fn">argmax</span>(bls_power.power)
+bls_period <span class="op">=</span> bls_power.period[index]
+bls_t0     <span class="op">=</span> bls_power.transit_time[index]
+bls_depth  <span class="op">=</span> bls_power.depth[index]
+
+<span class="fn">print</span>(<span class="str">f"Best Period: <span class="var">{bls_period:.4f}</span> days"</span>)</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">python — alias rejection</span>
+      </div>
+      <pre><span class="cmt"># Reject harmonics: P/2, 2P, P/3, 3P, 3/2P, 2/3P</span>
+period_window_rtol <span class="op">=</span> <span class="num">0.01</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> s_indices:
+    is_alias <span class="op">=</span> <span class="fn">any</span>([
+        np.<span class="fn">isclose</span>(current_period, bls_period_1 <span class="op">*</span> r, rtol<span class="op">=</span>period_window_rtol)
+        <span class="kw">for</span> r <span class="kw">in</span> [<span class="num">1</span>, <span class="num">0.5</span>, <span class="num">2</span>, <span class="num">1/3</span>, <span class="num">3</span>, <span class="num">1.5</span>, <span class="num">2/3</span>]
+    ])
+    <span class="kw">if not</span> is_alias:
+        bls_period_2 <span class="op">=</span> current_period
+        <span class="kw">break</span></pre>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 6 ══ -->
+  <section class="section" id="s-batman">
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <h2>batman — Transit Modelling</h2>
+    </div>
+    <div class="prose">
+      <p><strong>batman</strong> (Bad-Ass Transit Model cAlculatioNs) generates precise analytic transit light curves for a given set of physical parameters. We first generate synthetic light curves to understand parameter effects, then fit to real TESS data.</p>
+    </div>
+
+    <h3>Transit Parameters</h3>
+    <table class="param-table">
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Symbol</th>
+          <th>Description</th>
+          <th>Typical value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>t0</td><td>t₀</td><td>Mid-transit time</td><td>1.0 days</td></tr>
+        <tr><td>per</td><td>P</td><td>Orbital period</td><td>2.1 days</td></tr>
+        <tr><td>rp</td><td>Rp/R★</td><td>Planet-to-star radius ratio</td><td>0.05–0.20</td></tr>
+        <tr><td>a</td><td>a/R★</td><td>Semi-major axis / stellar radius</td><td>3–30</td></tr>
+        <tr><td>inc</td><td>i</td><td>Orbital inclination</td><td>~90°</td></tr>
+        <tr><td>ecc</td><td>e</td><td>Eccentricity</td><td>0.0</td></tr>
+        <tr><td>u</td><td>u₁, u₂</td><td>Limb-darkening coefficients</td><td>[0.1, 0.0]</td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">python — generate artificial transit</span>
+      </div>
+      <pre><span class="kw">import</span> <span class="mod">batman</span>
+
+times  <span class="op">=</span> np.<span class="fn">linspace</span>(<span class="num">0.6</span>, <span class="num">1.4</span>, <span class="num">100</span>)
+params <span class="op">=</span> batman.<span class="fn">TransitParams</span>()
+
+params.t0       <span class="op">=</span> <span class="num">1.0</span>        <span class="cmt"># mid-transit time (days)</span>
+params.per      <span class="op">=</span> <span class="num">2.1</span>        <span class="cmt"># orbital period (days)</span>
+params.rp       <span class="op">=</span> <span class="num">0.2</span>        <span class="cmt"># Rp / R★</span>
+params.a        <span class="op">=</span> <span class="num">3.2</span>        <span class="cmt"># a / R★</span>
+params.inc      <span class="op">=</span> np.<span class="fn">degrees</span>(<span class="num">0.45</span> <span class="op">*</span> np.pi)
+params.ecc      <span class="op">=</span> <span class="num">0.0</span>
+params.w        <span class="op">=</span> <span class="num">0.0</span>
+params.u        <span class="op">=</span> [<span class="num">0.1</span>, <span class="num">0.0</span>]
+params.limb_dark <span class="op">=</span> <span class="str">"quadratic"</span>
+
+m    <span class="op">=</span> batman.<span class="fn">TransitModel</span>(params, times)
+flux <span class="op">=</span> m.<span class="fn">light_curve</span>(params)
+
+plt.<span class="fn">plot</span>(times, flux, <span class="str">"r-"</span>)
+plt.<span class="fn">title</span>(<span class="str">"Artificial Transit — batman"</span>)</pre>
+    </div>
+
+    <h3>Fitting to TESS Data (curve_fit)</h3>
+    <div class="prose">
+      <p>We bin the phase-folded light curve, then use <code>scipy.optimize.curve_fit</code> to optimise the four free parameters: <em>k, a/R★, inc, t0</em>.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">python — scipy curve_fit</span>
+      </div>
+      <pre><span class="kw">from</span> <span class="mod">scipy.optimize</span> <span class="kw">import</span> curve_fit
+
+p0           <span class="op">=</span> [<span class="num">0.1</span>, <span class="num">10.0</span>, <span class="num">87.0</span>, <span class="num">0.0</span>]   <span class="cmt"># k, a/R★, inc, t0</span>
+bounds_lower <span class="op">=</span> [<span class="num">0.01</span>,  <span class="num">2</span>, <span class="num">60</span>, <span class="op">-</span><span class="num">0.05</span>]
+bounds_upper <span class="op">=</span> [<span class="num">0.50</span>, <span class="num">30</span>, <span class="num">90</span>,  <span class="num">0.05</span>]
+
+popt, pcov <span class="op">=</span> <span class="fn">curve_fit</span>(transit_model, t_fit, f_fit,
+                        p0<span class="op">=</span>p0, bounds<span class="op">=</span>(bounds_lower, bounds_upper),
+                        maxfev<span class="op">=</span><span class="num">20000</span>)
+
+k_fit, a_fit, inc_fit, t0_fit <span class="op">=</span> popt
+<span class="fn">print</span>(<span class="str">f"Rp/R★ = <span class="var">{k_fit:.4f}</span>,  a/R★ = <span class="var">{a_fit:.2f}</span>,  inc = <span class="var">{inc_fit:.2f}</span>°"</span>)</pre>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 7 ══ -->
+  <section class="section" id="s-mcmc">
+    <div class="section-head">
+      <span class="section-num">07</span>
+      <h2>MCMC — Posterior Sampling</h2>
+    </div>
+    <div class="prose">
+      <p><strong>Markov Chain Monte Carlo</strong> is a statistical technique used to sample the probability distribution of model parameters. Instead of giving you just one best-fit value, MCMC explores the <em>entire space</em> of possible solutions that fit the data — giving us uncertainties too.</p>
+      <p>We use <code>emcee</code> (the MCMC Hammer) with 32 walkers and 3000 steps, discarding the first 500 as burn-in.</p>
+    </div>
+
+    <div class="cards">
+      <div class="info-card">
+        <div class="ic-label">Walkers</div>
+        <div class="ic-value">32</div>
+        <div class="ic-desc">Parallel chains</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">Steps</div>
+        <div class="ic-value">3 000</div>
+        <div class="ic-desc">Per walker</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">Burn-in</div>
+        <div class="ic-value">500</div>
+        <div class="ic-desc">Discarded steps</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">Free params</div>
+        <div class="ic-value">4</div>
+        <div class="ic-desc">k, a/R★, inc, t0</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">python — emcee sampler</span>
+      </div>
+      <pre><span class="kw">import</span> <span class="mod">emcee</span>, <span class="mod">corner</span>
+
+ndim, nwalkers <span class="op">=</span> <span class="num">4</span>, <span class="num">32</span>
+p0 <span class="op">=</span> initial <span class="op">+</span> <span class="num">1e-4</span> <span class="op">*</span> np.random.<span class="fn">randn</span>(nwalkers, ndim)
+
+sampler <span class="op">=</span> emcee.<span class="fn">EnsembleSampler</span>(nwalkers, ndim, log_prob,
+                                  args<span class="op">=</span>(t, f, sigma))
+sampler.<span class="fn">run_mcmc</span>(p0, <span class="num">3000</span>, progress<span class="op">=</span><span class="kw">True</span>)
+
+samples <span class="op">=</span> sampler.<span class="fn">get_chain</span>(discard<span class="op">=</span><span class="num">500</span>, thin<span class="op">=</span><span class="num">10</span>, flat<span class="op">=</span><span class="kw">True</span>)
+k_m, a_m, inc_m, t0_m <span class="op">=</span> np.<span class="fn">median</span>(samples, axis<span class="op">=</span><span class="num">0</span>)
+
+<span class="cmt"># Corner plot</span>
+corner.<span class="fn">corner</span>(samples, labels<span class="op">=</span>[<span class="str">"k"</span>, <span class="str">"a/R★"</span>, <span class="str">"inc"</span>, <span class="str">"t0"</span>],
+              truths<span class="op">=</span>[k_m, a_m, inc_m, t0_m])</pre>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 8 ══ -->
+  <section class="section" id="s-problem">
+    <div class="section-head">
+      <span class="section-num">08</span>
+      <h2>Problem Statement</h2>
+    </div>
+    <div class="prose">
+      <p>The following code generates a <strong>simulated transit light curve</strong> with random physical parameters. Your task is to recover <em>everything you can</em> from the noisy data.</p>
+    </div>
+
+    <div class="callout" style="border-left-color: var(--accent2); color: var(--accent2);">
+      🔬 Challenge: extract period, transit depth, duration, Rp/R★, a/R★, and inclination from the synthetic light curve below.
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot"></div><div class="code-dot"></div><div class="code-dot"></div></div>
+        <span class="code-lang">python — synthetic challenge data</span>
+      </div>
+      <pre><span class="kw">from</span> <span class="mod">pytransit</span> <span class="kw">import</span> QuadraticModel
+np.random.<span class="fn">seed</span>(<span class="num">42</span>)  <span class="cmt"># for reproducibility</span>
+
+<span class="cmt"># ── Random physically valid parameters ──</span>
+k   <span class="op">=</span> np.random.<span class="fn">uniform</span>(<span class="num">0.05</span>, <span class="num">0.15</span>)          <span class="cmt"># Rp/R★</span>
+ldc <span class="op">=</span> <span class="fn">list</span>(np.random.<span class="fn">uniform</span>(<span class="num">0.1</span>, <span class="num">0.4</span>, size<span class="op">=</span><span class="num">2</span>)) <span class="cmt"># limb darkening</span>
+t0  <span class="op">=</span> <span class="num">0.0</span>                                    <span class="cmt"># reference transit time</span>
+p   <span class="op">=</span> np.random.<span class="fn">uniform</span>(<span class="num">2.0</span>, <span class="num">5.0</span>)             <span class="cmt"># period (days)</span>
+a   <span class="op">=</span> np.random.<span class="fn">uniform</span>(<span class="num">5.0</span>, <span class="num">15.0</span>)            <span class="cmt"># a / R★</span>
+
+<span class="cmt"># Ensure inclination produces a transit: cos(i) < (1 + k) / a</span>
+cosi_max <span class="op">=</span> (<span class="num">1</span> <span class="op">+</span> k) <span class="op">/</span> a
+i <span class="op">=</span> np.<span class="fn">arccos</span>(np.random.<span class="fn">uniform</span>(<span class="num">0</span>, cosi_max))
+
+<span class="cmt"># ── Generate 5–8 transit cycles ──</span>
+n_cycles <span class="op">=</span> np.random.<span class="fn">uniform</span>(<span class="num">5</span>, <span class="num">8</span>)
+times    <span class="op">=</span> np.<span class="fn">linspace</span>(t0 <span class="op">-</span> <span class="num">0.5</span><span class="op">*</span>p, t0 <span class="op">+</span> n_cycles<span class="op">*</span>p, <span class="num">1000</span>)
+
+<span class="cmt"># ── Model + noise ──</span>
+tm <span class="op">=</span> <span class="fn">QuadraticModel</span>()
+tm.<span class="fn">set_data</span>(times)
+true_flux  <span class="op">=</span> tm.<span class="fn">evaluate</span>(k, ldc, t0, p, a, i, <span class="num">0.0</span>, <span class="num">0.0</span>)
+noise_std  <span class="op">=</span> np.random.<span class="fn">uniform</span>(<span class="num">0.0005</span>, <span class="num">0.0012</span>)
+noisy_flux <span class="op">=</span> true_flux <span class="op">+</span> np.random.<span class="fn">normal</span>(<span class="num">0</span>, noise_std, size<span class="op">=</span>true_flux.shape)</pre>
+    </div>
+
+    <div class="tags">
+      <span class="tag tag-orange">seed=42</span>
+      <span class="tag tag-blue">BLS → period</span>
+      <span class="tag tag-blue">batman → Rp/R★</span>
+      <span class="tag tag-green">emcee → posteriors</span>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <p>NIUS (Astronomy) 2025 · Data Processing in Astronomy Workshop</p>
+    <p>
+      Lecture: Dr. Priyanka Chaturvedi, TIFR ·
+      Tutorial: Prof. Bhaswati Mookerjea, Dr. Akshat Singhal &amp; Astronomy Cell
+    </p>
+    <p style="margin-top:10px;">
+      <a href="https://lightkurve.github.io/lightkurve/" target="_blank">Lightkurve docs</a> ·
+      <a href="https://docs.astropy.org/en/latest/timeseries/bls.html" target="_blank">AstroPy BLS</a> ·
+      <a href="https://lweb.cfa.harvard.edu/~lkreidberg/batman/" target="_blank">batman docs</a>
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
