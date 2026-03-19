@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Image Processing — JWST NIUS 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f5f7;--bg2:#fff;--nav-bg:rgba(245,245,247,0.85);--text:#1d1d1f;--muted:#6e6e73;--accent:#0071e3;--accent2:#bf4800;--border:#d2d2d7;--card-bg:#fff;--dark:#1d1d1f;--cyan:#0071e3;--gold:#bf4800;}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,sans-serif;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,0.08);height:44px;display:flex;align-items:center;}
+.nav-inner{max-width:1024px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 20px;}
+.nav-logo{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--dark);text-decoration:none;letter-spacing:1px;display:flex;align-items:center;gap:7px;}
+.nav-logo .logo-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;}
+.nav-links{display:flex;align-items:center;list-style:none;}
+.nav-links a{font-size:12px;color:var(--muted);text-decoration:none;padding:0 13px;transition:color .2s;white-space:nowrap;}
+.nav-links a:hover{color:var(--dark)}
+.nav-links a.active{color:var(--dark);font-weight:500;}
+
+/* PAGE HERO */
+.page-hero{
+  background:linear-gradient(145deg,#020c20 0%,#041830 50%,#060a10 100%);
+  padding:80px 40px 70px;text-align:center;position:relative;overflow:hidden;
+}
+.page-hero canvas.bg-c{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.page-hero-content{position:relative;z-index:1;}
+.page-tag{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;color:#63c8ff;text-transform:uppercase;display:inline-block;border:1px solid rgba(99,200,255,0.3);padding:6px 16px;border-radius:20px;margin-bottom:20px;background:rgba(0,100,200,0.1);}
+.page-hero h1{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,5vw,3.8rem);font-weight:900;color:#fff;line-height:1.05;margin-bottom:16px;}
+.page-hero h1 em{font-style:normal;color:#ffc843;}
+.page-hero p{font-size:1.1rem;color:rgba(255,255,255,0.65);max-width:600px;margin:0 auto;line-height:1.7;}
+
+/* CONTENT */
+.content{max-width:1100px;margin:0 auto;padding:60px 32px;}
+
+/* TAB NAV */
+.tab-bar{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:48px;width:fit-content;}
+.tab-btn{font-size:13px;padding:9px 22px;border:none;background:transparent;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500;transition:all .2s;white-space:nowrap;}
+.tab-btn.active{background:var(--dark);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.tab-btn:hover:not(.active){background:rgba(0,0,0,0.05);}
+
+.tab-panel{display:none;animation:fadeIn .4s ease;}
+.tab-panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION BLOCKS */
+.section-block{margin-bottom:56px;}
+.section-block h2{font-size:1.8rem;font-weight:700;color:var(--dark);margin-bottom:8px;}
+.section-block .subtitle{font-size:1rem;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+
+/* Pipeline steps */
+.pipeline{display:flex;align-items:flex-start;gap:0;margin:32px 0;overflow-x:auto;padding-bottom:8px;}
+.pipe-step{display:flex;flex-direction:column;align-items:center;min-width:130px;}
+.pipe-box{
+  width:110px;height:80px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;
+  border:1.5px solid;font-size:11px;font-weight:600;text-align:center;padding:8px;
+  transition:transform .2s;cursor:default;
+}
+.pipe-box:hover{transform:translateY(-4px);}
+.pipe-box .pipe-icon{font-size:22px;}
+.pipe-label{font-size:11px;color:var(--muted);margin-top:8px;text-align:center;max-width:110px;}
+.pipe-arrow{font-size:18px;color:var(--border);margin:0 4px;margin-top:26px;flex-shrink:0;}
+
+/* Code block */
+.code-wrap{background:#1c1c1e;border-radius:14px;overflow:hidden;margin:20px 0;}
+.code-header{background:#2c2c2e;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;}
+.code-header span{font-family:'Space Mono',monospace;font-size:12px;color:#a0a0a5;}
+.code-dots{display:flex;gap:6px;}
+.dot-r{width:12px;height:12px;border-radius:50%;background:#ff5f57;}
+.dot-y{width:12px;height:12px;border-radius:50%;background:#febc2e;}
+.dot-g{width:12px;height:12px;border-radius:50%;background:#28c840;}
+.code-body{padding:20px 22px;font-family:'Space Mono',monospace;font-size:13px;line-height:1.85;overflow-x:auto;color:#cdd6f4;}
+.kw{color:#cba6f7}.fn{color:#89b4fa}.st{color:#a6e3a1}.cm{color:#585b70}.nm{color:#fab387}.op{color:#89dceb}
+
+/* Result / output box */
+.output-box{background:#f0faf0;border:1px solid #d0e8d0;border-radius:10px;padding:18px 22px;margin-top:14px;}
+.output-box .out-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:#2d7a2d;text-transform:uppercase;margin-bottom:8px;}
+.output-box pre{font-family:'Space Mono',monospace;font-size:12px;color:#1a4a1a;line-height:1.8;}
+
+/* Canvas visualizations */
+.viz-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:24px 0;}
+.viz-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.viz-header h4{font-size:13px;font-weight:600;color:var(--dark);}
+.viz-tag{font-size:10px;font-family:'Space Mono',monospace;letter-spacing:1px;color:var(--accent);background:rgba(0,113,227,0.08);border:1px solid rgba(0,113,227,0.2);padding:3px 10px;border-radius:4px;}
+.viz-body{padding:0;}
+.viz-body canvas{width:100%;display:block;}
+
+/* Two col */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+.two-col-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;}
+.info-card h4{font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:8px;}
+.info-card p{font-size:0.9rem;color:var(--muted);line-height:1.65;}
+.badge{display:inline-block;font-size:10px;font-family:'Space Mono',monospace;padding:3px 10px;border-radius:4px;margin:3px;letter-spacing:1px;}
+.badge-blue{background:rgba(0,113,227,0.1);color:var(--accent);border:1px solid rgba(0,113,227,0.25);}
+.badge-gold{background:rgba(191,72,0,0.1);color:var(--accent2);border:1px solid rgba(191,72,0,0.25);}
+.badge-green{background:rgba(30,120,30,0.1);color:#1a7a1a;border:1px solid rgba(30,120,30,0.25);}
+
+/* Slider */
+.slider-section{margin:32px 0;}
+.slider-section h3{font-size:1.2rem;font-weight:700;margin-bottom:6px;color:var(--dark);}
+.slider-section p{font-size:0.9rem;color:var(--muted);margin-bottom:18px;}
+.img-slider-wrap{position:relative;border-radius:14px;overflow:hidden;cursor:ew-resize;border:1px solid var(--border);max-width:720px;}
+.img-slider-wrap canvas{width:100%;display:block;}
+.slider-handle{position:absolute;top:0;bottom:0;width:3px;background:var(--accent);box-shadow:0 0 20px rgba(0,113,227,0.6);cursor:ew-resize;display:flex;align-items:center;justify-content:center;}
+.slider-handle::before{content:'◀ ▶';font-size:11px;color:var(--accent);background:var(--bg2);border:1px solid var(--accent);border-radius:20px;padding:5px 9px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.slider-foot{display:flex;justify-content:space-between;padding:8px 12px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;}
+
+/* Aperture photometry interactive */
+.ap-container{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start;}
+.ap-canvas-wrap{background:#0a0d18;border-radius:12px;overflow:hidden;border:1px solid rgba(0,100,200,0.2);}
+.ap-controls{display:flex;flex-direction:column;gap:14px;}
+.ctrl-group{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.ctrl-label{font-size:11px;font-weight:600;color:var(--dark);display:flex;justify-content:space-between;margin-bottom:8px;}
+.ctrl-val{color:var(--accent);}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:var(--border);border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.phot-result{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.phot-result h5{font-size:12px;font-weight:700;color:var(--dark);margin-bottom:10px;}
+.phot-row{display:flex;justify-content:space-between;margin-bottom:7px;font-size:12px;}
+.phot-key{color:var(--muted);}
+.phot-val{font-family:'Space Mono',monospace;color:var(--dark);}
+
+@media(max-width:760px){.two-col,.two-col-3,.ap-container{grid-template-columns:1fr;}.pipeline{flex-wrap:wrap;}.pipe-arrow{display:none;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html"><span class="logo-dot"></span>JWST</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="overview.html">Mission</a></li>
+      <li><a href="simulations.html">Simulations</a></li>
+      <li><a href="imageprocessing.html" class="active">Image Processing</a></li>
+      <li><a href="blogs.html">Blogs</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <canvas class="bg-c" id="heroBg"></canvas>
+  <div class="page-hero-content">
+    <span class="page-tag">NIUS Workshop · Module 2</span>
+    <h1>Astronomical<br><em>Image Processing</em></h1>
+    <p>From raw CCD pixels to calibrated science images — bias correction, aperture photometry, and difference imaging from ILMT data.</p>
+  </div>
+</div>
+
+<div class="content">
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('bias')">Master Bias</button>
+    <button class="tab-btn" onclick="switchTab('phot')">Aperture Photometry</button>
+    <button class="tab-btn" onclick="switchTab('sub')">Image Subtraction</button>
+    <button class="tab-btn" onclick="switchTab('pipeline')">Full Pipeline</button>
+  </div>
+
+  <!-- TAB 1: MASTER BIAS -->
+  <div class="tab-panel active" id="tab-bias">
+    <div class="section-block">
+      <h2>Master Bias Frame Creation</h2>
+      <p class="subtitle">A bias frame captures the baseline electronic offset added by the CCD readout electronics. By median-combining many bias frames, we suppress random noise while preserving the systematic offset — giving us the Master Bias.</p>
+
+      <div class="pipeline">
+        <div class="pipe-step"><div class="pipe-box" style="background:#f0f4ff;border-color:#c0ccff;color:#3a4ab0"><div class="pipe-icon">📷</div>Raw Bias<br>Frames</div><div class="pipe-label">Multiple<br>zero-exposure frames</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="pipe-box" style="background:#fff4f0;border-color:#ffccb0;color:#b04000"><div class="pipe-icon">🔢</div>Median<br>Combine</div><div class="pipe-label">Reject outlier<br>pixel values</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="pipe-box" style="background:#f0fff4;border-color:#90e0b0;color:#1a7a3a"><div class="pipe-icon">✅</div>Master<br>Bias</div><div class="pipe-label">Single clean<br>reference frame</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="pipe-box" style="background:#faf0ff;border-color:#d0a0ff;color:#7020b0"><div class="pipe-icon">➖</div>Subtract<br>from Science</div><div class="pipe-label">Apply to all<br>science frames</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="pipe-box" style="background:#f0f8ff;border-color:#80c0ff;color:#0060c0"><div class="pipe-icon">🌟</div>Calibrated<br>Image</div><div class="pipe-label">Bias-corrected<br>science image</div></div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><div class="code-dots"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div></div><span>NIUS_Image_Cleaning.ipynb</span></div>
+        <div class="code-body"><pre><span class="kw">from</span> ccdproc <span class="kw">import</span> CCDData, Combiner
+<span class="kw">from</span> astropy <span class="kw">import</span> units <span class="kw">as</span> u
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Load all bias frames ──────────────────────────────</span>
+bias_frames = []
+<span class="kw">for</span> bias_file <span class="kw">in</span> bias_list:
+    bias = CCDData.<span class="fn">read</span>(bias_file, unit=<span class="st">'adu'</span>)
+    bias_frames.<span class="fn">append</span>(bias)
+
+<span class="cm"># ── Create combiner and apply median stacking ─────────</span>
+combiner = <span class="fn">Combiner</span>(bias_frames)
+
+<span class="cm"># Sigma clipping to reject cosmic rays and hot pixels</span>
+combiner.<span class="fn">sigma_clipping</span>(low_thresh=<span class="nm">3</span>, high_thresh=<span class="nm">3</span>,
+                          func=np.ma.median)
+
+<span class="cm"># Median combine — robust against outliers</span>
+master_bias = combiner.<span class="fn">median_combine</span>()
+
+<span class="cm"># ── Save master bias ──────────────────────────────────</span>
+master_bias.<span class="fn">write</span>(<span class="st">'master_bias.fits'</span>, overwrite=<span class="nm">True</span>)
+
+<span class="cm"># ── Subtract from a science frame ────────────────────</span>
+<span class="kw">from</span> ccdproc <span class="kw">import</span> subtract_bias
+
+science = CCDData.<span class="fn">read</span>(<span class="st">'science_frame.fits'</span>, unit=<span class="st">'adu'</span>)
+calibrated = <span class="fn">subtract_bias</span>(science, master_bias)
+
+<span class="cm"># Check residual statistics</span>
+<span class="fn">print</span>(<span class="st">f"Mean bias level: {np.mean(master_bias.data):.2f} ADU"</span>)
+<span class="fn">print</span>(<span class="st">f"Bias RMS noise: {np.std(master_bias.data):.3f} ADU"</span>)</pre></div>
+      </div>
+
+      <div class="output-box">
+        <div class="out-label">Sample Output</div>
+        <pre>Mean bias level: 1024.82 ADU
+Bias RMS noise:  3.471 ADU
+Master bias saved → master_bias.fits  [2048×2048 px]
+Calibrated frame residual noise: 12.3 ADU (before flat)</pre>
+      </div>
+
+      <!-- Visual -->
+      <div class="viz-wrap" style="margin-top:30px">
+        <div class="viz-header"><h4>Interactive: Median Stacking Visualization</h4><span class="viz-tag">SIMULATION</span></div>
+        <div class="viz-body">
+          <canvas id="biasCanvas" width="1060" height="260"></canvas>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:24px">
+        <div class="info-card">
+          <h4>Why Median, Not Mean?</h4>
+          <p>The median is robust to outliers — cosmic ray hits appear as extremely bright pixels in individual frames but are rejected by the median. The mean would be heavily skewed by these events.</p>
+        </div>
+        <div class="info-card">
+          <h4>Python Packages Used</h4>
+          <p>
+            <span class="badge badge-blue">ccdproc</span>
+            <span class="badge badge-gold">astropy</span>
+            <span class="badge badge-green">numpy</span>
+            <span class="badge badge-blue">photutils</span>
+          </p>
+          <p style="margin-top:10px;font-size:0.85rem;color:var(--muted)">Industry-standard astronomical image calibration stack used by professional observatories worldwide.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: APERTURE PHOTOMETRY -->
+  <div class="tab-panel" id="tab-phot">
+    <div class="section-block">
+      <h2>Aperture Photometry</h2>
+      <p class="subtitle">Measures stellar brightness by summing all pixel counts within a circular aperture, then subtracting the sky background estimated from a surrounding annulus. Critical for generating precise light curves.</p>
+
+      <div class="ap-container">
+        <div>
+          <div class="ap-canvas-wrap">
+            <canvas id="apCanvas" width="340" height="340"></canvas>
+          </div>
+        </div>
+        <div class="ap-controls">
+          <h3 style="font-size:1.1rem;font-weight:700;color:var(--dark);margin-bottom:4px;">Adjust Aperture Parameters</h3>
+          <div class="ctrl-group">
+            <div class="ctrl-label">Aperture Radius (px) <span class="ctrl-val" id="apR_val">18</span></div>
+            <input type="range" id="apR" min="5" max="35" value="18" oninput="updateAP()"/>
+          </div>
+          <div class="ctrl-group">
+            <div class="ctrl-label">Sky Inner Annulus (px) <span class="ctrl-val" id="skyIn_val">24</span></div>
+            <input type="range" id="skyIn" min="18" max="45" value="24" oninput="updateAP()"/>
+          </div>
+          <div class="ctrl-group">
+            <div class="ctrl-label">Sky Outer Annulus (px) <span class="ctrl-val" id="skyOut_val">36</span></div>
+            <input type="range" id="skyOut" min="25" max="55" value="36" oninput="updateAP()"/>
+          </div>
+          <div class="phot-result">
+            <h5>Photometry Results</h5>
+            <div class="phot-row"><span class="phot-key">Total Aperture Counts</span><span class="phot-val" id="res-total">—</span></div>
+            <div class="phot-row"><span class="phot-key">Sky Background/px²</span><span class="phot-val" id="res-sky">—</span></div>
+            <div class="phot-row"><span class="phot-key">Net Stellar Flux</span><span class="phot-val" id="res-net">—</span></div>
+            <div class="phot-row"><span class="phot-key">Instrumental Mag</span><span class="phot-val" id="res-mag">—</span></div>
+            <div class="phot-row"><span class="phot-key">SNR</span><span class="phot-val" id="res-snr">—</span></div>
+          </div>
+          <div class="info-card">
+            <h4>Formula</h4>
+            <p style="font-family:'Space Mono',monospace;font-size:12px;line-height:1.9;color:var(--dark)">
+              F_star = Σ(pixel counts)<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;− sky_mean × N_ap<br><br>
+              mag = −2.5 × log₁₀(F_star)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ zero_point
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-wrap" style="margin-top:32px">
+        <div class="code-header"><div class="code-dots"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div></div><span>aperture_photometry.py</span></div>
+        <div class="code-body"><pre><span class="kw">from</span> photutils.aperture <span class="kw">import</span> (CircularAperture, 
+                                 CircularAnnulus,
+                                 aperture_photometry)
+<span class="kw">from</span> astropy.stats <span class="kw">import</span> sigma_clipped_stats
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Define star positions (from source detection) ───</span>
+positions = [(120.3, 145.7), (280.1, 98.4), (400.5, 310.2)]
+
+<span class="cm"># ── Create aperture and sky annulus ─────────────────</span>
+aperture = <span class="fn">CircularAperture</span>(positions, r=<span class="nm">18</span>)
+annulus  = <span class="fn">CircularAnnulus</span>(positions, r_in=<span class="nm">24</span>, r_out=<span class="nm">36</span>)
+
+<span class="cm"># ── Perform photometry on calibrated image ──────────</span>
+phot_table = <span class="fn">aperture_photometry</span>(calibrated_image, aperture)
+sky_table  = <span class="fn">aperture_photometry</span>(calibrated_image, annulus)
+
+<span class="cm"># ── Estimate sky background per pixel ───────────────</span>
+sky_mean = sky_table[<span class="st">'aperture_sum'</span>] / annulus.<span class="fn">area</span>
+sky_total = sky_mean <span class="op">*</span> aperture.<span class="fn">area</span>
+
+<span class="cm"># ── Net stellar flux (sky-subtracted) ───────────────</span>
+net_flux = phot_table[<span class="st">'aperture_sum'</span>] <span class="op">-</span> sky_total
+
+<span class="cm"># ── Convert to instrumental magnitude ───────────────</span>
+inst_mag = <span class="op">-</span><span class="nm">2.5</span> <span class="op">*</span> np.<span class="fn">log10</span>(net_flux) <span class="op">+</span> zero_point
+
+<span class="fn">print</span>(phot_table)
+<span class="fn">print</span>(<span class="st">f"Net fluxes: {net_flux.data}"</span>)</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: IMAGE SUBTRACTION -->
+  <div class="tab-panel" id="tab-sub">
+    <div class="section-block">
+      <h2>Image Subtraction — ILMT Data</h2>
+      <p class="subtitle">Difference imaging (image subtraction) from the International Liquid Mirror Telescope (ILMT) reveals transient objects — supernovae, variable stars, asteroids — by subtracting a reference image from a new observation.</p>
+
+      <div class="two-col">
+        <div>
+          <div class="pipeline" style="flex-direction:column;gap:0;align-items:flex-start;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+              <div class="pipe-box" style="width:220px;height:auto;padding:12px 16px;background:#f0f4ff;border-color:#c0ccff;color:#3a4ab0;flex-direction:row;gap:10px">
+                <div class="pipe-icon" style="font-size:18px">🔭</div>
+                <div><div style="font-weight:700;font-size:13px">Science Frame (New)</div><div style="font-size:11px;color:#6e6e73;margin-top:2px">Recent ILMT observation</div></div>
+              </div>
+            </div>
+            <div style="margin-left:24px;color:var(--border);font-size:18px;line-height:1">↓ astroalign</div>
+            <div style="display:flex;align-items:center;gap:12px;margin:8px 0">
+              <div class="pipe-box" style="width:220px;height:auto;padding:12px 16px;background:#fff4f0;border-color:#ffccb0;color:#b04000;flex-direction:row;gap:10px">
+                <div class="pipe-icon" style="font-size:18px">📐</div>
+                <div><div style="font-weight:700;font-size:13px">Align Frames</div><div style="font-size:11px;color:#6e6e73;margin-top:2px">Match pointing/rotation</div></div>
+              </div>
+            </div>
+            <div style="margin-left:24px;color:var(--border);font-size:18px;line-height:1">↓ subtract</div>
+            <div style="display:flex;align-items:center;gap:12px;margin:8px 0">
+              <div class="pipe-box" style="width:220px;height:auto;padding:12px 16px;background:#f0fff4;border-color:#90e0b0;color:#1a7a3a;flex-direction:row;gap:10px">
+                <div class="pipe-icon" style="font-size:18px">➖</div>
+                <div><div style="font-weight:700;font-size:13px">Difference Image</div><div style="font-size:11px;color:#6e6e73;margin-top:2px">New − Reference</div></div>
+              </div>
+            </div>
+            <div style="margin-left:24px;color:var(--border);font-size:18px;line-height:1">↓ detect</div>
+            <div style="display:flex;align-items:center;gap:12px;margin:8px 0">
+              <div class="pipe-box" style="width:220px;height:auto;padding:12px 16px;background:#faf0ff;border-color:#d0a0ff;color:#7020b0;flex-direction:row;gap:10px">
+                <div class="pipe-icon" style="font-size:18px">🌟</div>
+                <div><div style="font-weight:700;font-size:13px">Transient Sources</div><div style="font-size:11px;color:#6e6e73;margin-top:2px">New or varied objects</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="code-wrap">
+            <div class="code-header"><div class="code-dots"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div></div><span>NIUS_Image_Subtraction.ipynb</span></div>
+            <div class="code-body"><pre><span class="kw">import</span> astroalign <span class="kw">as</span> aa
+<span class="kw">from</span> astropy.io <span class="kw">import</span> fits
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> photutils.detection <span class="kw">import</span> DAOStarFinder
+
+<span class="cm"># Load images from ILMT</span>
+ref  = fits.<span class="fn">getdata</span>(<span class="st">'reference_frame.fits'</span>)
+new  = fits.<span class="fn">getdata</span>(<span class="st">'new_observation.fits'</span>)
+
+<span class="cm"># Align new image to reference</span>
+aligned, footprint = aa.<span class="fn">register</span>(new, ref)
+
+<span class="cm"># Subtract: difference image</span>
+diff = aligned.astype(float) - ref.astype(float)
+
+<span class="cm"># Detect transient sources in diff</span>
+mean, med, std = sigma_clipped_stats(diff)
+daofind = <span class="fn">DAOStarFinder</span>(fwhm=<span class="nm">3.0</span>, threshold=<span class="nm">5.0</span><span class="op">*</span>std)
+sources = daofind(diff - med)
+
+<span class="fn">print</span>(<span class="st">f"Transients found: {len(sources)}"</span>)
+<span class="fn">print</span>(sources[<span class="st">'xcentroid'</span>, <span class="st">'ycentroid'</span>, <span class="st">'peak'</span>])</pre></div>
+          </div>
+          <div class="output-box">
+            <div class="out-label">Sample Output</div>
+            <pre>Transients found: 3
+ xcentroid  ycentroid    peak
+  243.72     187.41    458.3
+  891.14     502.88   1203.7
+  124.66     731.20    329.5</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image subtraction slider -->
+      <div class="slider-section">
+        <h3>Interactive: Reference vs. Difference Image</h3>
+        <p>Drag the slider to see what image subtraction reveals — the bright spots in the difference image are candidate transient or variable sources.</p>
+        <div class="img-slider-wrap" id="subSliderWrap">
+          <canvas id="subSliderCanvas" width="720" height="360"></canvas>
+          <div class="slider-handle" id="subSliderHandle" style="left:50%"></div>
+        </div>
+        <div class="slider-foot"><span>◀ REFERENCE IMAGE</span><span>DIFFERENCE IMAGE ▶</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: FULL PIPELINE -->
+  <div class="tab-panel" id="tab-pipeline">
+    <div class="section-block">
+      <h2>Complete CCD Calibration Pipeline</h2>
+      <p class="subtitle">The full end-to-end pipeline from raw CCD data to science-ready images, as implemented in the NIUS workshop using Python and astropy ecosystem packages.</p>
+
+      <div class="two-col-3">
+        <div class="info-card" style="border-top:3px solid #0071e3">
+          <h4>Stage 1: Calibration Frames</h4>
+          <p>Collect and combine Bias, Dark, and Flat frames. Create master calibration frames using median stacking with sigma-clipping.</p>
+          <div style="margin-top:12px"><span class="badge badge-blue">ccdproc</span><span class="badge badge-gold">astropy.io.fits</span></div>
+        </div>
+        <div class="info-card" style="border-top:3px solid #bf4800">
+          <h4>Stage 2: Science Reduction</h4>
+          <p>Apply bias subtraction, dark subtraction, and flat-field correction to each science frame to remove instrumental artifacts.</p>
+          <div style="margin-top:12px"><span class="badge badge-gold">ccdproc.subtract_bias</span></div>
+        </div>
+        <div class="info-card" style="border-top:3px solid #1a7a1a">
+          <h4>Stage 3: Source Detection</h4>
+          <p>Run DAOStarFinder or SEP to detect stellar sources. Extract PSF properties, positions, and fluxes for photometry catalog.</p>
+          <div style="margin-top:12px"><span class="badge badge-green">photutils</span><span class="badge badge-blue">sep</span></div>
+        </div>
+      </div>
+
+      <div class="code-wrap" style="margin-top:28px">
+        <div class="code-header"><div class="code-dots"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div></div><span>full_pipeline.py — Complete CCD Reduction</span></div>
+        <div class="code-body"><pre><span class="cm">"""
+NIUS Astronomy 2025 — Full CCD Reduction Pipeline
+Implements: Bias, Dark, Flat calibration + aperture photometry
+"""</span>
+
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> astropy <span class="kw">import</span> units <span class="kw">as</span> u
+<span class="kw">from</span> astropy.stats <span class="kw">import</span> sigma_clipped_stats
+<span class="kw">import</span> ccdproc
+<span class="kw">from</span> photutils.aperture <span class="kw">import</span> CircularAperture, CircularAnnulus, aperture_photometry
+<span class="kw">from</span> photutils.detection <span class="kw">import</span> DAOStarFinder
+
+<span class="cm"># ─────────────────────────────────────────────
+# Step 1: Create Master Calibration Frames
+# ─────────────────────────────────────────────</span>
+
+<span class="kw">def</span> <span class="fn">create_master</span>(file_list, method=<span class="st">'median'</span>):
+    frames = [ccdproc.CCDData.<span class="fn">read</span>(f, unit=<span class="st">'adu'</span>) <span class="kw">for</span> f <span class="kw">in</span> file_list]
+    combiner = ccdproc.<span class="fn">Combiner</span>(frames)
+    combiner.<span class="fn">sigma_clipping</span>(low_thresh=<span class="nm">3</span>, high_thresh=<span class="nm">3</span>)
+    <span class="kw">return</span> combiner.<span class="fn">median_combine</span>()
+
+master_bias = <span class="fn">create_master</span>(<span class="fn">sorted</span>(Path(<span class="st">'data/bias'</span>).<span class="fn">glob</span>(<span class="st">'*.fits'</span>)))
+master_dark = <span class="fn">create_master</span>(<span class="fn">sorted</span>(Path(<span class="st">'data/dark'</span>).<span class="fn">glob</span>(<span class="st">'*.fits'</span>)))
+master_flat = <span class="fn">create_master</span>(<span class="fn">sorted</span>(Path(<span class="st">'data/flat'</span>).<span class="fn">glob</span>(<span class="st">'*.fits'</span>)))
+master_flat.<span class="fn">data</span> <span class="op">/=</span> np.<span class="fn">median</span>(master_flat.data)  <span class="cm"># normalize</span>
+
+<span class="cm"># ─────────────────────────────────────────────
+# Step 2: Reduce Science Frames
+# ─────────────────────────────────────────────</span>
+
+<span class="kw">def</span> <span class="fn">reduce_science</span>(raw_file):
+    sci = ccdproc.CCDData.<span class="fn">read</span>(raw_file, unit=<span class="st">'adu'</span>)
+    sci = ccdproc.<span class="fn">subtract_bias</span>(sci, master_bias)
+    sci = ccdproc.<span class="fn">subtract_dark</span>(sci, master_dark, 
+                                  exposure_time=<span class="st">'exptime'</span>,
+                                  exposure_unit=u.second)
+    sci = ccdproc.<span class="fn">flat_correct</span>(sci, master_flat)
+    <span class="kw">return</span> sci
+
+science_frames = [<span class="fn">reduce_science</span>(f) <span class="kw">for</span> f <span class="kw">in</span> Path(<span class="st">'data/science'</span>).<span class="fn">glob</span>(<span class="st">'*.fits'</span>)]
+
+<span class="cm"># ─────────────────────────────────────────────
+# Step 3: Source Detection + Photometry
+# ─────────────────────────────────────────────</span>
+
+<span class="kw">for</span> frame <span class="kw">in</span> science_frames:
+    mean, med, std = <span class="fn">sigma_clipped_stats</span>(frame.data)
+    finder = <span class="fn">DAOStarFinder</span>(fwhm=<span class="nm">4.0</span>, threshold=<span class="nm">5.</span><span class="op">*</span>std)
+    sources = finder(frame.data <span class="op">-</span> med)
+    
+    positions = np.<span class="fn">transpose</span>([sources[<span class="st">'xcentroid'</span>], sources[<span class="st">'ycentroid'</span>]])
+    apertures = <span class="fn">CircularAperture</span>(positions, r=<span class="nm">18.0</span>)
+    annuli    = <span class="fn">CircularAnnulus</span>(positions, r_in=<span class="nm">24.0</span>, r_out=<span class="nm">36.0</span>)
+    
+    phot = <span class="fn">aperture_photometry</span>(frame, [apertures, annuli])
+    sky = phot[<span class="st">'aperture_sum_1'</span>] <span class="op">/</span> annuli.area
+    net = phot[<span class="st">'aperture_sum_0'</span>] <span class="op">-</span> sky <span class="op">*</span> apertures.area
+    phot[<span class="st">'net_flux'</span>] = net
+    phot[<span class="st">'inst_mag'</span>] = <span class="op">-</span><span class="nm">2.5</span> <span class="op">*</span> np.<span class="fn">log10</span>(net)
+    
+    <span class="fn">print</span>(phot[<span class="st">'id'</span>, <span class="st">'xcentroid'</span>, <span class="st">'ycentroid'</span>, <span class="st">'net_flux'</span>, <span class="st">'inst_mag'</span>])</pre></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /content -->
+
+<footer style="background:#f5f5f7;border-top:1px solid #d2d2d7;padding:28px 40px;text-align:center;font-size:12px;color:#6e6e73">
+  <p>NIUS Astronomy 2025 · Image Processing Module · <a href="index.html" style="color:#0071e3;text-decoration:none">← Back to Home</a></p>
+</footer>
+
+<script>
+// NAV
+function switchTab(id){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['bias','phot','sub','pipeline'][i]===id);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+id));
+  if(id==='phot') setTimeout(updateAP,50);
+  if(id==='sub') setTimeout(drawSubSlider,50);
+  if(id==='pipeline') {}
+}
+
+// HERO BG
+(function(){
+  const c=document.getElementById('heroBg'), ctx=c.getContext('2d');
+  function resize(){c.width=c.offsetWidth;c.height=c.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(let i=0;i<150;i++){
+      ctx.beginPath();ctx.arc(Math.random()*c.width,Math.random()*c.height,Math.random()*1.2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.5+0.1})`;ctx.fill();
+    }
+  }
+  draw();
+})();
+
+// BIAS CANVAS VISUALIZATION
+(function(){
+  const c=document.getElementById('biasCanvas'), ctx=c.getContext('2d'), W=c.width, H=c.height;
+  const frames=5, fw=(W-80)/(frames+1), margin=20, top=40, bottom=H-30;
+  const rng=s=>{let x=Math.sin(s)*10000;return x-Math.floor(x);};
+
+  ctx.fillStyle='#f0f4f8';ctx.fillRect(0,0,W,H);
+  ctx.font='11px Space Mono';ctx.fillStyle='#6e6e73';
+
+  // Draw individual bias frames
+  for(let f=0;f<frames;f++){
+    const x=margin+f*(fw+10), y=top, w=fw, h=bottom-top;
+    // frame bg
+    ctx.fillStyle='#1a1e2c'; ctx.fillRect(x,y,w,h);
+    // noise pattern per frame
+    for(let px=0;px<w*h/4;px++){
+      const px2=Math.random()*w, py=Math.random()*h;
+      const bright=0.1+rng(f*1000+px2+py)*0.3;
+      if(rng(f*777+px2)>0.95) ctx.fillStyle=`rgba(255,80,30,0.8)`; // hot pixel
+      else ctx.fillStyle=`rgba(180,200,240,${bright})`;
+      ctx.fillRect(x+px2,y+py,1.5,1.5);
+    }
+    // column gradient bias
+    const bg=ctx.createLinearGradient(x,y,x,y+h);
+    bg.addColorStop(0,'rgba(40,60,120,0.3)');bg.addColorStop(1,'rgba(10,15,30,0.3)');
+    ctx.fillStyle=bg;ctx.fillRect(x,y,w,h);
+    // label
+    ctx.fillStyle='#6e6e73';ctx.textAlign='center';
+    ctx.fillText('Bias '+( f+1), x+w/2, bottom+16);
+  }
+
+  // Arrow
+  const ax=margin+frames*(fw+10), ay=(top+bottom)/2;
+  ctx.strokeStyle='#0071e3';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(ax+6,ay);ctx.lineTo(ax+fw-4,ay);ctx.stroke();
+  ctx.fillStyle='#0071e3';ctx.beginPath();ctx.moveTo(ax+fw-4,ay-5);ctx.lineTo(ax+fw+4,ay);ctx.lineTo(ax+fw-4,ay+5);ctx.fill();
+  ctx.fillStyle='#0071e3';ctx.textAlign='center';ctx.font='10px Space Mono';
+  ctx.fillText('MEDIAN',ax+fw/2,ay-10);ctx.fillText('COMBINE',ax+fw/2,ay+18);
+
+  // Master bias
+  const mx=ax+fw+6, my=top, mw=fw*1.2, mh=bottom-top;
+  ctx.fillStyle='#0d1522';ctx.fillRect(mx,my,mw,mh);
+  // Clean gradient pattern
+  for(let row=0;row<mh;row+=3){
+    const v=0.08+rng(row*7)*0.12;
+    ctx.fillStyle=`rgba(180,200,255,${v})`;
+    ctx.fillRect(mx,my+row,mw,3);
+  }
+  ctx.strokeStyle='rgba(0,180,255,0.3)';ctx.lineWidth=1;
+  ctx.strokeRect(mx,my,mw,mh);
+  ctx.fillStyle='rgba(0,180,255,0.8)';ctx.textAlign='center';ctx.font='bold 11px Space Mono';
+  ctx.fillText('MASTER BIAS',mx+mw/2,bottom+16);
+})();
+
+// APERTURE PHOTOMETRY
+const starX=170, starY=170;
+const starFlux=8000, skyLevel=180;
+
+function updateAP(){
+  const apR=parseInt(document.getElementById('apR').value);
+  const skyIn=parseInt(document.getElementById('skyIn').value);
+  const skyOut=parseInt(document.getElementById('skyOut').value);
+  document.getElementById('apR_val').textContent=apR;
+  document.getElementById('skyIn_val').textContent=skyIn;
+  document.getElementById('skyOut_val').textContent=skyOut;
+
+  const c=document.getElementById('apCanvas'), ctx=c.getContext('2d'), W=340, H=340;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#080d18';ctx.fillRect(0,0,W,H);
+
+  // Stars
+  for(let i=0;i<60;i++){
+    const x=Math.random()*W, y=Math.random()*H, r=Math.random()*1.2+0.3;
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(200,220,255,${Math.random()*0.5+0.1})`;ctx.fill();
+  }
+  // Background stars
+  [[80,90,200],[240,260,150],[60,280,100]].forEach(([x,y,b])=>{
+    const g=ctx.createRadialGradient(x,y,0,x,y,6);
+    g.addColorStop(0,`rgba(255,255,255,${b/255})`);g.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  });
+  // Target star
+  const sg=ctx.createRadialGradient(starX,starY,0,starX,starY,apR*1.5);
+  sg.addColorStop(0,'rgba(255,255,240,1)');sg.addColorStop(0.15,'rgba(200,220,255,0.9)');sg.addColorStop(0.4,'rgba(150,170,255,0.4)');sg.addColorStop(1,'transparent');
+  ctx.beginPath();ctx.arc(starX,starY,apR*2,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+
+  // Aperture circle
+  ctx.beginPath();ctx.arc(starX,starY,apR,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,200,100,0.9)';ctx.lineWidth=2;ctx.setLineDash([]);ctx.stroke();
+
+  // Annulus
+  if(skyIn<skyOut){
+    ctx.beginPath();ctx.arc(starX,starY,skyIn,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,180,0,0.7)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();
+    ctx.beginPath();ctx.arc(starX,starY,skyOut,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,120,0,0.7)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Fill annulus
+    ctx.beginPath();ctx.arc(starX,starY,skyOut,0,Math.PI*2);ctx.arc(starX,starY,skyIn,0,Math.PI*2,true);
+    ctx.fillStyle='rgba(255,150,0,0.08)';ctx.fill();
+  }
+
+  // Labels
+  ctx.font='10px Space Mono';ctx.fillStyle='rgba(0,200,100,0.9)';ctx.fillText('Aperture r='+apR+'px',starX+apR+6,starY);
+  if(skyIn<skyOut){
+    ctx.fillStyle='rgba(255,150,0,0.8)';ctx.fillText('Sky annulus',starX+skyOut+6,starY+12);
+  }
+
+  // Compute results
+  const apArea=Math.PI*apR*apR;
+  const annArea=Math.PI*(skyOut*skyOut-skyIn*skyIn);
+  const totalCounts=Math.round(starFlux*Math.exp(-0.5*0)+skyLevel*apArea);
+  const skyPerPx=skyLevel+Math.random()*5;
+  const netFlux=Math.max(0,totalCounts-skyPerPx*apArea);
+  const mag=-2.5*Math.log10(netFlux)+25;
+  const noise=Math.sqrt(netFlux+skyPerPx*apArea);
+  const snr=netFlux/noise;
+
+  document.getElementById('res-total').textContent=Math.round(totalCounts).toLocaleString()+' ADU';
+  document.getElementById('res-sky').textContent=skyPerPx.toFixed(1)+' ADU/px²';
+  document.getElementById('res-net').textContent=Math.round(netFlux).toLocaleString()+' ADU';
+  document.getElementById('res-mag').textContent=mag.toFixed(3)+' mag';
+  document.getElementById('res-snr').textContent=snr.toFixed(1);
+}
+updateAP();
+
+// IMAGE SUBTRACTION SLIDER
+function drawSubSlider(){
+  const wrap=document.getElementById('subSliderWrap');
+  if(!wrap) return;
+  const canvas=document.getElementById('subSliderCanvas');
+  const handle=document.getElementById('subSliderHandle');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  let sx=W/2, dragging=false;
+  const rng=s=>{let x=Math.sin(s)*10000;return x-Math.floor(x);};
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Reference image (left)
+    ctx.fillStyle='#080d18';ctx.fillRect(0,0,W,H);
+    for(let i=0;i<200;i++){
+      ctx.fillStyle=`rgba(200,220,255,${rng(i*7)*0.4+0.05})`;
+      ctx.fillRect(rng(i*13)*W,rng(i*11)*H,1.5,1.5);
+    }
+    // Stars in reference
+    [[120,90,12],[300,180,8],[520,240,10],[200,320,6],[450,100,9],[600,300,7]].forEach(([x,y,r])=>{
+      const g=ctx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,'rgba(255,255,230,0.9)');g.addColorStop(0.5,'rgba(180,200,255,0.5)');g.addColorStop(1,'transparent');
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    });
+    ctx.fillStyle='rgba(99,200,255,0.5)';ctx.font='bold 11px Space Mono';ctx.textAlign='left';ctx.fillText('REFERENCE (ILMT)',12,H-14);
+
+    // Difference image (right side)
+    ctx.save();ctx.beginPath();ctx.rect(sx,0,W-sx,H);ctx.clip();
+    const diffBg=ctx.createLinearGradient(0,0,0,H);diffBg.addColorStop(0,'#04080c');diffBg.addColorStop(1,'#060a10');
+    ctx.fillStyle=diffBg;ctx.fillRect(0,0,W,H);
+    // Near-zero background noise
+    for(let i=0;i<300;i++){
+      ctx.fillStyle=`rgba(100,120,160,${rng(i*3)*0.12})`;
+      ctx.fillRect(rng(i*19)*W,rng(i*17)*H,1,1);
+    }
+    // Transient sources (new bright objects)
+    [[180,130,10,'rgba(255,200,50,0.9)'],[560,200,8,'rgba(100,220,255,0.9)'],[350,290,14,'rgba(255,100,50,0.95)']].forEach(([x,y,r,col])=>{
+      const g=ctx.createRadialGradient(x,y,0,x,y,r*2);
+      const ca=col.replace('0.9','0.7').replace('0.95','0.7').replace('0.9','0.6');
+      g.addColorStop(0,col);g.addColorStop(0.4,ca);g.addColorStop(1,'transparent');
+      ctx.beginPath();ctx.arc(x,y,r*2,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+      ctx.strokeStyle=col;ctx.lineWidth=1;ctx.setLineDash([3,3]);
+      ctx.strokeRect(x-r*3,y-r*3,r*6,r*6);ctx.setLineDash([]);
+      ctx.fillStyle=col;ctx.font='9px Space Mono';ctx.textAlign='left';ctx.fillText('TRANSIENT',x+r*3+4,y+4);
+    });
+    ctx.fillStyle='rgba(255,200,50,0.8)';ctx.font='bold 11px Space Mono';ctx.textAlign='left';ctx.fillText('DIFFERENCE IMAGE',sx+8,H-14);
+    ctx.restore();
+  }
+
+  function update(clientX){
+    const rect=wrap.getBoundingClientRect();
+    sx=Math.max(10,Math.min(W-10,(clientX-rect.left)/rect.width*W));
+    handle.style.left=((sx/W)*100)+'%';draw();
+  }
+  wrap.addEventListener('mousedown',e=>{dragging=true;update(e.clientX);});
+  document.addEventListener('mousemove',e=>{if(dragging)update(e.clientX);});
+  document.addEventListener('mouseup',()=>dragging=false);
+  wrap.addEventListener('touchstart',e=>{dragging=true;update(e.touches[0].clientX);},{passive:true});
+  document.addEventListener('touchmove',e=>{if(dragging)update(e.touches[0].clientX);},{passive:true});
+  document.addEventListener('touchend',()=>dragging=false);
+  draw();
+}
+drawSubSlider();
+</script>
+</body>
+</html>
