@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Research Blogs — JWST NIUS 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f5f7;--bg2:#fff;--nav-bg:rgba(245,245,247,0.85);--text:#1d1d1f;--muted:#6e6e73;--accent:#0071e3;--accent2:#bf4800;--border:#d2d2d7;--dark:#1d1d1f;}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,sans-serif;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,0.08);height:44px;display:flex;align-items:center;}
+.nav-inner{max-width:1024px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 20px;}
+.nav-logo{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;color:var(--dark);text-decoration:none;letter-spacing:1px;display:flex;align-items:center;gap:7px;}
+.nav-logo .logo-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;}
+.nav-links{display:flex;align-items:center;list-style:none;}
+.nav-links a{font-size:12px;color:var(--muted);text-decoration:none;padding:0 13px;transition:color .2s;}
+.nav-links a:hover{color:var(--dark)}.nav-links a.active{color:var(--dark);font-weight:500;}
+
+.page-hero{background:linear-gradient(145deg,#020c18 0%,#040f22 50%,#020810 100%);padding:80px 40px 60px;text-align:center;position:relative;overflow:hidden;}
+.page-hero canvas.bg-c{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.page-hero-content{position:relative;z-index:1;}
+.page-tag{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;color:#63c8ff;text-transform:uppercase;display:inline-block;border:1px solid rgba(99,200,255,0.3);padding:6px 16px;border-radius:20px;margin-bottom:20px;background:rgba(0,100,200,0.1);}
+.page-hero h1{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:900;color:#fff;line-height:1.05;margin-bottom:16px;}
+.page-hero h1 em{font-style:normal;color:#f59e0b;}
+.page-hero p{font-size:1rem;color:rgba(255,255,255,0.6);max-width:540px;margin:0 auto;line-height:1.7;}
+
+.content{max-width:1100px;margin:0 auto;padding:60px 32px;}
+
+/* BLOG FILTER */
+.filter-bar{display:flex;gap:8px;margin-bottom:48px;flex-wrap:wrap;}
+.filter-btn{font-size:13px;padding:8px 18px;border:1px solid var(--border);background:var(--bg2);border-radius:20px;cursor:pointer;color:var(--muted);font-weight:500;transition:all .2s;}
+.filter-btn.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+.filter-btn:hover:not(.active){background:rgba(0,0,0,0.05);color:var(--dark);}
+
+/* FEATURED BLOG */
+.featured-blog{background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:32px;display:grid;grid-template-columns:1fr 1fr;cursor:pointer;transition:all .3s;}
+.featured-blog:hover{box-shadow:0 12px 40px rgba(0,0,0,0.12);transform:translateY(-2px);}
+.featured-blog-img{height:320px;position:relative;overflow:hidden;}
+.featured-blog-img canvas{width:100%;height:100%;display:block;}
+.featured-badge{position:absolute;top:16px;left:16px;background:var(--dark);color:#fff;font-size:10px;font-family:'Space Mono',monospace;letter-spacing:2px;padding:5px 12px;border-radius:4px;text-transform:uppercase;}
+.featured-blog-body{padding:40px;}
+.blog-cat-tag{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;display:block;}
+.featured-blog-body h2{font-size:1.6rem;font-weight:700;line-height:1.25;color:var(--dark);margin-bottom:14px;font-family:'Orbitron',sans-serif;}
+.featured-blog-body p{font-family:'Crimson Pro',serif;font-size:1.05rem;color:var(--muted);line-height:1.75;margin-bottom:20px;}
+.blog-meta-row{display:flex;gap:16px;align-items:center;margin-bottom:20px;}
+.blog-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.read-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.read-btn{display:inline-block;background:var(--dark);color:#fff;font-size:12px;font-family:'Space Mono',monospace;letter-spacing:1px;padding:12px 24px;border-radius:8px;text-decoration:none;transition:all .2s;}
+.read-btn:hover{background:var(--accent);}
+
+/* BLOG GRID */
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.blog-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .3s;text-decoration:none;display:block;}
+.blog-card:hover{box-shadow:0 8px 30px rgba(0,0,0,0.1);transform:translateY(-3px);}
+.blog-card-img{height:160px;overflow:hidden;position:relative;}
+.blog-card-img canvas{width:100%;height:100%;display:block;}
+.blog-card-body{padding:20px;}
+.card-tag{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:block;}
+.blog-card-body h3{font-size:1rem;font-weight:700;color:var(--dark);line-height:1.35;margin-bottom:8px;}
+.blog-card-body p{font-size:0.875rem;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.card-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:12px;margin-top:auto;}
+.card-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.card-read{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(4px);}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border-radius:20px;max-width:680px;width:90%;max-height:85vh;overflow-y:auto;padding:48px;position:relative;transform:translateY(20px);transition:transform .3s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-close{position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:50%;background:var(--bg);border:1px solid var(--border);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+.modal-close:hover{background:var(--dark);color:#fff;}
+.modal h2{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;color:var(--dark);margin-bottom:8px;line-height:1.3;}
+.modal .meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:24px;}
+.modal .body{font-family:'Crimson Pro',serif;font-size:1.05rem;line-height:1.85;color:#2a2a2c;}
+.modal .body h4{font-size:1.1rem;font-weight:700;margin:20px 0 8px;color:var(--dark);}
+.modal .body p{margin-bottom:14px;}
+
+@media(max-width:800px){.featured-blog{grid-template-columns:1fr;}.featured-blog-img{height:200px;}.blog-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html"><span class="logo-dot"></span>JWST</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="overview.html">Mission</a></li>
+      <li><a href="simulations.html">Simulations</a></li>
+      <li><a href="imageprocessing.html">Image Processing</a></li>
+      <li><a href="blogs.html" class="active">Blogs</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <canvas class="bg-c" id="heroBg"></canvas>
+  <div class="page-hero-content">
+    <span class="page-tag">NIUS Workshop · Research Notes</span>
+    <h1>Field <em>Blogs</em> &<br>Research Notes</h1>
+    <p>Personal reflections and technical writeups from the NIUS Astronomy 2025 Data Processing Workshop.</p>
+  </div>
+</div>
+
+<div class="content">
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filter('all',this)">All Posts</button>
+    <button class="filter-btn" onclick="filter('exoplanet',this)">Exoplanets</button>
+    <button class="filter-btn" onclick="filter('imaging',this)">CCD Imaging</button>
+    <button class="filter-btn" onclick="filter('solar',this)">Solar Physics</button>
+    <button class="filter-btn" onclick="filter('jwst',this)">JWST Science</button>
+  </div>
+
+  <!-- FEATURED -->
+  <div class="featured-blog" onclick="openModal(0)" data-tags="exoplanet">
+    <div class="featured-blog-img">
+      <canvas id="featImg" width="600" height="320"></canvas>
+      <div class="featured-badge">Featured Post</div>
+    </div>
+    <div class="featured-blog-body">
+      <span class="blog-cat-tag" style="color:#0071e3">Exoplanets</span>
+      <h2>Detecting an Exoplanet Transit with TESS & Batman</h2>
+      <div class="blog-meta-row"><span class="blog-date">March 2025</span><span class="read-time">8 min read</span></div>
+      <p>From downloading raw TESS light curves to fitting a transit model with Batman — a complete walkthrough of the photometric transit detection pipeline, from BLS period search to derived planetary parameters.</p>
+      <span class="read-btn">Read Article →</span>
+    </div>
+  </div>
+
+  <!-- BLOG GRID -->
+  <div class="blog-grid" id="blogGrid">
+    <a class="blog-card" onclick="openModal(1)" href="javascript:void(0)" data-tags="imaging">
+      <div class="blog-card-img"><canvas id="b0" width="360" height="160"></canvas></div>
+      <div class="blog-card-body">
+        <span class="card-tag" style="color:#bf4800">CCD Imaging</span>
+        <h3>Why Your Telescope Images Look Terrible (& How to Fix Them)</h3>
+        <p>The walkthrough on bias subtraction, dark correction, and flat-fielding that every astronomy student needs...</p>
+        <div class="card-footer"><span class="card-date">Feb 2025</span><span class="card-read">5 min →</span></div>
+      </div>
+    </a>
+    <a class="blog-card" onclick="openModal(2)" href="javascript:void(0)" data-tags="solar">
+      <div class="blog-card-img"><canvas id="b1" width="360" height="160"></canvas></div>
+      <div class="blog-card-body">
+        <span class="card-tag" style="color:#d97706">Solar Physics</span>
+        <h3>Reading the Sun: Coronal Loops & Active Regions with SunPy</h3>
+        <p>How SDO/AIA EUV data reveals the magnetic architecture of the solar corona — coronal loops, active regions, and open-field coronal holes — and how to work with it in Python using SunPy.</p>
+        <div class="card-footer"><span class="card-date">Feb 2025</span><span class="card-read">6 min →</span></div>
+      </div>
+    </a>
+    <a class="blog-card" onclick="openModal(3)" href="javascript:void(0)" data-tags="exoplanet">
+      <div class="blog-card-img"><canvas id="b2" width="360" height="160"></canvas></div>
+      <div class="blog-card-body">
+        <span class="card-tag" style="color:#0071e3">Exoplanets</span>
+        <h3>Understanding the BLS Periodogram — Hunting Planets in Noise</h3>
+        <p>A deep dive into Box Least Squares (BLS): the algorithm that finds planetary transit periods buried in stellar noise...</p>
+        <div class="card-footer"><span class="card-date">Jan 2025</span><span class="card-read">7 min →</span></div>
+      </div>
+    </a>
+    <a class="blog-card" onclick="openModal(4)" href="javascript:void(0)" data-tags="imaging">
+      <div class="blog-card-img"><canvas id="b3" width="360" height="160"></canvas></div>
+      <div class="blog-card-body">
+        <span class="card-tag" style="color:#bf4800">CCD Imaging</span>
+        <h3>Image Subtraction on ILMT Data — Finding the Invisible</h3>
+        <p>Using difference imaging on back-to-back ILMT observations to find transient events in a crowded star field...</p>
+        <div class="card-footer"><span class="card-date">Mar 2025</span><span class="card-read">6 min →</span></div>
+      </div>
+    </a>
+    <a class="blog-card" onclick="openModal(5)" href="javascript:void(0)" data-tags="jwst">
+      <div class="blog-card-img"><canvas id="b4" width="360" height="160"></canvas></div>
+      <div class="blog-card-body">
+        <span class="card-tag" style="color:#7c3aed">JWST Science</span>
+        <h3>JWST: Two Years of Science and What Comes Next</h3>
+        <p>From SMACS 0723 to WASP-39b's CO₂ detection — a survey of JWST's key science results and the programs that will define the next decade of observational astronomy.</p>
+        <div class="card-footer"><span class="card-date">Jan 2025</span><span class="card-read">5 min →</span></div>
+      </div>
+    </a>
+    <a class="blog-card" onclick="openModal(6)" href="javascript:void(0)" data-tags="exoplanet">
+      <div class="blog-card-img"><canvas id="b5" width="360" height="160"></canvas></div>
+      <div class="blog-card-body">
+        <span class="card-tag" style="color:#0071e3">Exoplanets</span>
+        <h3>What the Transit Depth Tells You — Inferring Planetary Properties</h3>
+        <p>Given just the depth and duration of a transit dip, how much can we actually infer about a planet's physical properties?</p>
+        <div class="card-footer"><span class="card-date">Mar 2025</span><span class="card-read">4 min →</span></div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal(null,true)">✕</button>
+    <h2 id="modalTitle"></h2>
+    <div class="meta" id="modalMeta"></div>
+    <div class="body" id="modalBody"></div>
+  </div>
+</div>
+
+<footer style="background:#f5f5f7;border-top:1px solid #d2d2d7;padding:28px 40px;text-align:center;font-size:12px;color:#6e6e73">
+  <p>NIUS Astronomy 2025 · Research Blogs · <a href="index.html" style="color:#0071e3;text-decoration:none">← Back to Home</a></p>
+</footer>
+
+<script>
+// HERO BG
+(function(){const c=document.getElementById('heroBg'),ctx=c.getContext('2d');function r(){c.width=c.offsetWidth;c.height=c.offsetHeight;}r();window.addEventListener('resize',r);for(let i=0;i<200;i++){ctx.beginPath();ctx.arc(Math.random()*c.width,Math.random()*c.height,Math.random()*1.3,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.5+0.1})`;ctx.fill();}})();
+
+// DRAW BLOG IMAGES
+function drawBlogImg(id,type,W,H){
+  const c=document.getElementById(id);if(!c)return;const ctx=c.getContext('2d');
+  c.width=W;c.height=H;
+  const rng=s=>{let x=Math.sin(s)*10000;return x-Math.floor(x);};
+  if(type==='transit'){
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#010c20');bg.addColorStop(1,'#020816');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<100;i++){ctx.beginPath();ctx.arc(rng(i*13)*W,rng(i*7)*H,rng(i)*1.2+0.3,0,Math.PI*2);ctx.fillStyle=`rgba(200,220,255,${rng(i*3)*0.5+0.1})`;ctx.fill();}
+    const sg=ctx.createRadialGradient(W*0.4,H*0.4,0,W*0.4,H*0.4,70);sg.addColorStop(0,'#fffce0');sg.addColorStop(0.4,'#ffcc44');sg.addColorStop(1,'rgba(180,60,0,0)');
+    ctx.beginPath();ctx.arc(W*0.4,H*0.4,70,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+    const pg=ctx.createRadialGradient(W*0.62,H*0.3,0,W*0.62,H*0.3,20);pg.addColorStop(0,'#3a7ab0');pg.addColorStop(1,'#0a1a3a');
+    ctx.beginPath();ctx.arc(W*0.62,H*0.3,20,0,Math.PI*2);ctx.fillStyle=pg;ctx.fill();
+    ctx.beginPath();ctx.strokeStyle='rgba(0,180,255,0.5)';ctx.lineWidth=1.5;
+    [{x:0.1,y:0.75},{x:0.2,y:0.74},{x:0.35,y:0.75},{x:0.42,y:0.85},{x:0.49,y:0.85},{x:0.56,y:0.75},{x:0.7,y:0.74},{x:0.85,y:0.75},{x:0.95,y:0.76}].forEach(({x,y},i)=>i?ctx.lineTo(x*W,y*H):ctx.moveTo(x*W,y*H));ctx.stroke();
+  } else if(type==='ccd'){
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#08101e');bg.addColorStop(1,'#040810');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<80;i++){ctx.fillStyle=`rgba(${rng(i*3)<0.08?'255,60,20':'180,200,255'},${rng(i*5)*0.4+0.05})`;ctx.fillRect(rng(i*11)*W,rng(i*7)*H,1.5,1.5);}
+    ctx.strokeStyle='rgba(255,200,67,0.15)';ctx.lineWidth=0.5;
+    for(let x=0;x<W;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    const cg=ctx.createRadialGradient(W*0.6,H*0.45,0,W*0.6,H*0.45,45);cg.addColorStop(0,'rgba(0,180,255,0.5)');cg.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(W*0.6,H*0.45,45,0,Math.PI*2);ctx.fillStyle=cg;ctx.fill();
+    const b2g=ctx.createRadialGradient(W*0.25,H*0.65,0,W*0.25,H*0.65,28);b2g.addColorStop(0,'rgba(200,220,255,0.6)');b2g.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(W*0.25,H*0.65,28,0,Math.PI*2);ctx.fillStyle=b2g;ctx.fill();
+  } else if(type==='solar'){
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#150600');bg.addColorStop(1,'#040200');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    const sg=ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,H*0.55);sg.addColorStop(0,'rgba(255,250,180,0.5)');sg.addColorStop(0.3,'rgba(255,160,30,0.4)');sg.addColorStop(0.6,'rgba(180,60,0,0.2)');sg.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(W*0.5,H*0.5,H*0.55,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+    for(let a=0;a<8;a++){const ang=a/8*Math.PI*2;ctx.beginPath();ctx.moveTo(W*0.5+H*0.45*Math.cos(ang),H*0.5+H*0.45*Math.sin(ang));ctx.quadraticCurveTo(W*0.5+(H*0.45+30)*Math.cos(ang+0.3),H*0.5+(H*0.45+30)*Math.sin(ang+0.3),W*0.5+H*0.45*Math.cos(ang+0.5),H*0.5+H*0.45*Math.sin(ang+0.5));ctx.strokeStyle='rgba(255,120,30,0.3)';ctx.lineWidth=2;ctx.stroke();}
+  } else if(type==='jwst'){
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#020810');bg.addColorStop(1,'#051428');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<80;i++){ctx.beginPath();ctx.arc(rng(i*13)*W,rng(i*7)*H,rng(i)*1.5+0.3,0,Math.PI*2);ctx.fillStyle=`rgba(200,220,255,${rng(i*3)*0.6+0.1})`;ctx.fill();}
+    const hex=(x,y,r)=>{ctx.beginPath();for(let a=0;a<6;a++){const ax=x+r*Math.cos(a*Math.PI/3-Math.PI/6),ay=y+r*Math.sin(a*Math.PI/3-Math.PI/6);a?ctx.lineTo(ax,ay):ctx.moveTo(ax,ay);}ctx.closePath();ctx.strokeStyle='rgba(255,200,67,0.5)';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='rgba(255,200,67,0.08)';ctx.fill();};
+    const hr=18,cx=W*0.6,cy=H*0.5;[[0,0],[hr*1.73,0],[-hr*1.73,0],[hr*0.87,hr*1.5],[hr*0.87,-hr*1.5],[-hr*0.87,hr*1.5],[-hr*0.87,-hr*1.5]].forEach(([dx,dy])=>hex(cx+dx,cy+dy,hr-1));
+  }
+}
+drawBlogImg('featImg','transit',600,320);
+drawBlogImg('b0','ccd',360,160);drawBlogImg('b1','solar',360,160);drawBlogImg('b2','transit',360,160);
+drawBlogImg('b3','ccd',360,160);drawBlogImg('b4','jwst',360,160);drawBlogImg('b5','transit',360,160);
+
+// FILTER
+function filter(tag, btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('[data-tags]').forEach(el=>{
+    el.style.display=(tag==='all'||el.dataset.tags.includes(tag))?'':'none';
+  });
+}
+
+// BLOG CONTENT
+const blogs=[
+  {title:"Detecting an Exoplanet Transit with TESS & Batman",meta:"Exoplanets · March 2025 · 8 min read",body:`<h4>The Photometric Transit Method</h4><p>When a planet passes in front of its host star from our line of sight, it blocks a small fraction of the star's light. For a Neptune-sized planet orbiting a Sun-like star, this dip is roughly 1% — subtle, but measurable with modern space-based photometry. TESS (Transiting Exoplanet Survey Satellite) observes 26 sectors of sky, each for 27 continuous days, generating light curves precise enough to detect this signal reliably.</p><h4>Downloading and Preparing the Data</h4><p>The Lightkurve Python library provides direct access to TESS pixel data and processed light curves through MAST. After downloading the target pixel file for a chosen star, the pipeline performs Simple Aperture Photometry (SAP), selects optimal pixel masks, and removes instrumental systematics using the PDCSAP flux product. The result is a normalized, detrended flux time series ready for period analysis.</p><h4>Running the BLS Periodogram</h4><p>The Box Least Squares (BLS) algorithm is the standard tool for period-finding in transit data. It folds the light curve over a grid of trial periods and fits a box-shaped dip at each one, returning a power spectrum. A sharp peak in this spectrum at ~3.5 days indicated a periodic transit signal. Phasing the data at this period produced a clean, well-defined dip with a depth of approximately 1.2% and a duration of about 2.5 hours — consistent with a hot Neptune at 0.04 AU from its star.</p><h4>Modeling the Transit with Batman</h4><p>Batman (Bad-Ass Transit Model cAlculatioN) is a Python package for computing analytic transit light curves. Parameterizing the model with Rp/Rs = 0.11, orbital inclination = 87°, period = 3.5 days, and a quadratic limb-darkening law gave an excellent fit to the folded data. The residuals between model and observation were consistent with photon noise, confirming the transit signal is real and well-described by a simple spherical planet model.</p><h4>Interpreting the Result</h4><p>The derived planet radius — approximately 11% of its host star's radius — places this object squarely in the hot Neptune category. Its ultra-short orbital period implies a dayside equilibrium temperature exceeding 1500 K, ruling out liquid water and making it an interesting candidate for atmospheric characterization via transmission spectroscopy with JWST.</p>`},
+  {title:"CCD Calibration: Why Raw Images Are Scientifically Unusable",meta:"CCD Imaging · February 2025 · 5 min read",body:`<h4>The Problem with Raw Data</h4><p>A raw CCD image is not a faithful record of the sky. It is the sum of the true astrophysical signal and several systematic noise sources introduced by the detector itself. For qualitative imaging these artifacts are often invisible, but for any quantitative analysis — measuring stellar brightness, detecting faint transients, doing aperture photometry — they corrupt the data and must be removed before science can begin.</p><h4>Bias: The Electronic Pedestal</h4><p>CCD readout electronics add a constant offset to every pixel value to prevent negative numbers during analog-to-digital conversion. This bias level is not uniform — it varies slightly from pixel to pixel and column to column in a fixed, repeatable pattern. The Master Bias frame is constructed by median-combining 15–20 zero-second exposures. Because all images share this same additive offset, subtracting the Master Bias removes it cleanly without adding noise.</p><h4>Dark Current: Thermal Contamination</h4><p>Silicon CCDs generate electron-hole pairs not just from photons but from thermal excitation. This dark current accumulates during long exposures and varies per pixel — some pixels (called "hot pixels") are dramatically higher than average. Dark frames are taken at the same temperature and exposure time as science frames, then bias-subtracted and scaled appropriately before subtraction.</p><h4>Flat Fields: Mapping the Detector's Response</h4><p>No CCD pixel has exactly the same sensitivity as its neighbours. Vignetting from the optical system further reduces illumination toward the field edges. Flat-field frames — exposures of a uniformly illuminated surface or twilight sky — map these variations. Dividing a calibrated science image by the normalized Master Flat corrects for all spatial sensitivity gradients, making photometric measurements consistent across the entire field of view.</p><h4>The Calibrated Product</h4><p>After bias subtraction, dark subtraction, and flat division, the calibrated image is photometrically clean. Source extraction routines can now reliably detect stars to the photon-noise limit, and aperture photometry measurements will be accurate to within a fraction of a percent — a prerequisite for transit detection, period analysis, and variability monitoring.</p>`},
+  {title:"The Solar Corona in EUV: Reading Active Regions with SDO/AIA",meta:"Solar Physics · February 2025 · 6 min read",body:`<h4>Why the Corona Is Invisible to the Naked Eye</h4><p>The solar corona — the outermost layer of the Sun's atmosphere — reaches temperatures of one to three million Kelvin, far hotter than the 5,778 K photospheric surface below it. At these temperatures, plasma emits predominantly in extreme ultraviolet (EUV) and soft X-ray wavelengths, which are completely absorbed by Earth's atmosphere. Observing the corona requires space-based instruments, and no observatory has done this more comprehensively than NASA's Solar Dynamics Observatory (SDO).</p><h4>The AIA Instrument and its Wavelength Channels</h4><p>SDO's Atmospheric Imaging Assembly (AIA) images the full solar disk simultaneously in 10 UV and EUV channels, each sensitive to plasma at a different temperature. The 171Å channel — one of the most commonly analyzed — images plasma at approximately 630,000 K, revealing the quiet corona and coronal loops. The 193Å channel highlights plasma at ~1.5 MK, useful for active region cores and flare-heated material. Together, these channels provide a thermal map of the corona updated every 12 seconds.</p><h4>Coronal Loops: Magnetic Architecture Made Visible</h4><p>Coronal loops are arching structures of hot, dense plasma confined along closed magnetic field lines connecting regions of opposite polarity on the solar surface. They are most prominent above active regions — areas of intense, complex magnetic flux associated with sunspot groups. In 171Å images, loops appear as bright, well-defined arcs extending tens of thousands of kilometers into the corona. Their brightness traces plasma density; their shape traces the local magnetic topology.</p><h4>Coronal Holes: Open Field Regions</h4><p>In stark contrast to the bright active regions, coronal holes appear as dark patches — most commonly at the solar poles, though equatorial coronal holes occur during periods of low activity. These dark regions are not cooler; they are less dense, because the magnetic field there is open rather than closed. Plasma escapes along open field lines, becoming the fast solar wind that streams outward at 500–800 km/s and drives geomagnetic disturbances at Earth.</p><h4>Working with SunPy and aiapy</h4><p>The SunPy library provides a native Python interface for solar data, handling the specialized coordinate systems (helioprojective, heliocentric) that solar images require. The aiapy package extends this with AIA-specific calibration routines: pointing correction, exposure normalization, and instrument degradation correction. With these tools, a calibrated, spatially accurate solar image can be produced from raw FITS files in a few lines of code — providing a scientifically usable dataset for feature identification and time-series analysis.</p>`},
+  {title:"The Box Least Squares Periodogram: A Technical Overview",meta:"Exoplanets · January 2025 · 7 min read",body:`<h4>Why Standard Period-Finding Fails for Transits</h4><p>The Lomb-Scargle periodogram — the standard tool for period analysis in unevenly sampled time series — models variability as a sinusoidal signal. Stellar pulsations, ellipsoidal variations, and reflection effects are well-recovered by this approach. Planetary transits are not. A transit is a box-shaped dip: flat baseline, sharp ingress, flat bottom, sharp egress. Its power is spread inefficiently across many Lomb-Scargle harmonics, making it far less detectable than a sinusoid of equivalent amplitude.</p><h4>The BLS Algorithm</h4><p>Box Least Squares (BLS), introduced by Kovács et al. (2002), is tailored to exactly this signal shape. For each trial period P, the algorithm folds the time series, then exhaustively searches over all possible transit phases and durations, computing the best-fitting box model at each combination. The statistic maximized is the signal residue — essentially the ratio of the in-transit flux deficit to the noise. The period with the highest BLS power is the most probable transit period in the data.</p><h4>Computational Implementation</h4><p>A naïve BLS search over N data points and M trial periods has O(N·M²) complexity, which becomes prohibitive for large datasets. Modern implementations (including the astropy BLS and the Lightkurve wrapper) use efficient grid algorithms and can search hundreds of thousands of periods across tens of thousands of data points in seconds. The period grid is typically logarithmically spaced, with finer sampling at short periods where the number of observable transits is higher.</p><h4>Interpreting the Power Spectrum</h4><p>A clean BLS power spectrum for a transiting planet shows a sharp, isolated peak at the true period. However, aliases are always present: strong sub-peaks appear at half the period (two transits per orbit misidentified as one) and at integer multiples. The transit duration and depth at the best-fit period should be physically plausible — durations shorter than a few minutes or longer than 20% of the period are typically instrumental artifacts. The folded light curve at the candidate period is the final diagnostic: a real transit produces a symmetric, flat-bottomed dip with sharp contact points.</p><h4>False Positive Scenarios</h4><p>BLS is sensitive but not infallible. Eclipsing binary stars produce periodic box-shaped dips indistinguishable from transits at the primary eclipse — secondary eclipses at half the period reveal the true nature. Stellar variability correlated with the trial period can mimic a transit signal. Rolling systematic noise (common in ground-based photometry) produces broad, low-significance BLS peaks. Confirming a BLS detection always requires additional vetting: centroid tests, odd-even eclipse depth comparison, and ideally radial velocity follow-up.</p>`},
+  {title:"Image Subtraction for Transient Detection on ILMT Data",meta:"CCD Imaging · March 2025 · 6 min read",body:`<h4>The International Liquid Mirror Telescope</h4><p>The International Liquid Mirror Telescope (ILMT) at the Devasthal Observatory in Uttarakhand, India, is a 4-metre zenith-pointing telescope that uses a rotating dish of liquid mercury as its primary mirror. The telescope observes a fixed 27-arcminute strip of sky as Earth rotates, building up a deep co-added image of this strip over multiple nights. Its design — simple, robust, and free of the mechanical complexity of a tracking mount — makes it ideally suited for time-domain sky surveys, where the same field must be revisited repeatedly to detect changes.</p><h4>The Principle of Image Subtraction</h4><p>Image subtraction (or difference imaging) is the standard technique for detecting transient or variable sources in a repeated survey. A deep, high-quality reference image is constructed by stacking many co-added frames. Each new epoch is then astrometrically registered to the reference and point-spread-function (PSF) matched — because even small differences in seeing between epochs cause bright stars to produce residuals in a naive subtraction. After PSF matching, the reference is subtracted from the new epoch. In the resulting difference image, all static sources cancel, and only sources that changed in brightness between the reference and the new observation remain visible as positive or negative residuals.</p><h4>Astrometric Alignment with Astroalign</h4><p>Before subtraction, images must be precisely registered — any misalignment of even a fraction of a pixel produces large spurious residuals at every bright star. Astroalign handles this using a triangle-matching algorithm on the detected stellar positions: it identifies sets of three stars whose relative geometry is invariant to rotation, scale, and translation, matches these triangles between images, and derives the transformation parameters. The method is robust against outliers and requires no prior knowledge of the pointing solution or pixel scale.</p><h4>Source Detection in the Difference Frame</h4><p>After subtraction, DAOStarFinder or similar algorithms scan the difference image for point sources above a detection threshold — typically 5σ above the local background RMS. Positive residuals correspond to sources brighter in the new epoch than in the reference; negative residuals indicate sources that have faded. Candidate transients are then cross-matched against catalogs of known asteroids, variable stars, and AGN before being flagged as genuinely new phenomena worthy of follow-up.</p>`},
+  {title:"JWST: Two Years of Science and What Comes Next",meta:"JWST Science · January 2025 · 5 min read",body:`<h4>Engineering Context</h4><p>The James Webb Space Telescope launched on December 25, 2021, and reached its operating position at the Sun-Earth L2 Lagrange point in January 2022. Its 6.5-metre gold-coated beryllium primary mirror — segmented into 18 hexagonal elements that were deployed and phased in space — gives it a collecting area over six times that of Hubble. Operating at 40 K in the mid-infrared and down to 0.6 µm in the near-infrared, JWST accesses wavelengths inaccessible to Hubble and with far greater sensitivity than any previous observatory.</p><h4>First Science Results (2022–2023)</h4><p>JWST's first science images, released in July 2022, included a deep field of SMACS 0723 revealing thousands of gravitationally lensed background galaxies — some with redshifts placing them within the first billion years of cosmic history. Early spectroscopy of WASP-39b produced the first unambiguous space-based detection of CO₂ in an exoplanet atmosphere, along with signatures of SO₂ produced by photochemistry. The new JWST view of the Pillars of Creation in the Eagle Nebula resolved previously hidden proto-stellar jets and young stellar objects embedded in the dust columns.</p><h4>Exoplanet Atmosphere Science</h4><p>Transmission spectroscopy — measuring how starlight is filtered by a planet's atmosphere during transit — is one of JWST's most important science modes. By comparing in-transit and out-of-transit spectra, atmospheric molecular abundances, temperature profiles, and cloud properties can be inferred. JWST's wavelength range includes the key absorption bands of H₂O, CO₂, CH₄, CO, and SO₂. For the TRAPPIST-1 system, JWST observations are already constraining whether the inner rocky planets retain any atmosphere at all — a direct observational test of habitability.</p><h4>Looking Ahead</h4><p>With fuel usage during launch and orbit insertion far more efficient than the pessimistic pre-launch estimates, JWST is expected to operate for 20 years or more — well beyond its 10-year design life. Upcoming science programs will map the atmospheric diversity of dozens of sub-Neptune and super-Earth planets, probe star formation in the Magellanic Clouds at sub-parsec resolution, and extend the galaxy luminosity function to redshifts beyond 13, approaching the epoch when the first stars reionized the intergalactic medium.</p>`},
+  {title:"Transit Geometry: What the Light Curve Encodes",meta:"Exoplanets · March 2025 · 4 min read",body:`<h4>The Transit Depth and Planet Radius</h4><p>The fractional flux decrease during a planetary transit is δ = (Rp/Rs)², where Rp is the planet radius and Rs is the stellar radius. This relationship is geometrically exact for a uniformly bright stellar disk and an opaque planet. A transit depth of 1% corresponds to Rp/Rs = 0.1, meaning the planet's cross-sectional area is one percent of the star's. For a G-type star of solar radius, this yields a planet roughly the size of Jupiter. Around an M-dwarf with Rs ≈ 0.3 R☉, the same 1% dip implies a planet only three times Earth's radius.</p><h4>Transit Duration and Orbital Geometry</h4><p>The total transit duration — from first to fourth contact — depends on the orbital velocity of the planet, the chord it traces across the stellar disk (set by the impact parameter b = a·cos(i)/Rs), and the stellar radius. For a circular orbit, the transit duration scales as Rs/vorb, where vorb = 2πa/P from Kepler's third law. A measured duration therefore constrains the orbital semi-major axis a, giving the planet's distance from its star. A 2.5-hour transit at a 3.5-day period around a solar-type star places the planet at approximately 0.04 AU — well inside Mercury's orbit.</p><h4>Limb Darkening and Ingress Shape</h4><p>In reality, stars are not uniformly bright disks. Limb darkening — the decrease in surface brightness toward the stellar limb due to the temperature gradient in the photosphere — imprints a characteristic rounded bottom on the transit light curve rather than a flat box. The curvature of the transit floor encodes the limb-darkening coefficients, which depend on the stellar effective temperature, surface gravity, and metallicity. Fitting a model that accounts for limb darkening (as Batman does) therefore simultaneously constrains both planetary and stellar parameters.</p><h4>What Photometry Cannot Determine</h4><p>Transit photometry is powerful but incomplete. It constrains Rp/Rs, orbital period, inclination, and semi-major axis — but it is entirely insensitive to planetary mass. Mass measurement requires radial velocity spectroscopy: monitoring the small Doppler reflex motion of the host star induced by the planet's gravity. Without mass, planetary bulk density — and therefore bulk composition (rocky, icy, or gaseous) — remains unknown. This is why photometric transit surveys like TESS are always paired with ground-based spectroscopic follow-up programs, and why JWST atmospheric characterization adds a third dimension to the picture.</p>`}
+];
+
+function openModal(i){
+  const b=blogs[i];
+  document.getElementById('modalTitle').textContent=b.title;
+  document.getElementById('modalMeta').textContent=b.meta;
+  document.getElementById('modalBody').innerHTML=b.body;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(e,force){
+  if(force||e.target===document.getElementById('modalOverlay')){
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+</script>
+</body>
+</html>
