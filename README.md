@@ -44,7 +44,7 @@ Underlying analysis was done in Python using `lightkurve`, `batman`, `ccdproc`, 
 
 This project grew out of research on exoplanet detection via the Transit Method during TIFR's NIUS programme — modelling stellar light curves, processing CCD imaging data (bias/flat-field correction), and detecting transient objects through image subtraction and alignment.
 
-## 👤 Author
+##  Author
 
 **Mann Sutariya** — B.Sc Physics, PDEU
  mannsutaria2605@gmail.com
